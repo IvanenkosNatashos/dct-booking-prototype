@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Al Hosn Trip · Booking · DCT Companion Prototype</title>
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <!-- Liquid Glass lens filters: organic displacement of the backdrop,
+       the web analogue of iOS 26's .glassEffect() refraction -->
+  <svg class="lg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="lg-lens" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.009" numOctaves="2" seed="17" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="4" result="soft"/>
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="44" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="lg-lens-sm" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="2" seed="7" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="2.5" result="soft"/>
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="24" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="touch-cursor" id="touch-cursor" aria-hidden="true"></div>
+  <div class="stage">
+    <header class="stage-caption">
+      <span class="caption-brand">DCT · Visit Abu Dhabi</span>
+      <nav class="flow-tabs" aria-label="Journey">
+        <span class="flow-glider solo" aria-hidden="true"></span>
+        <button class="flow-tab active" data-flow="booking">Nana · Booking the trip</button>
+      </nav>
+    </header>
+
+    <div class="phone-wrap">
+      <div class="phone" id="phone">
+      <div class="phone-screens">
+
+        <!-- ─────────────── Screen 1 · Voice ask (Nana 3) ─────────────── -->
+        <section class="screen s-ask theme-dark active" data-screen="ask">
+          <div class="voice-backdrop">
+            <img class="cover" src="assets/night-market.jpg" alt="">
+            <div class="media-fade-bottom"></div>
+          </div>
+          <div class="dark-veil"></div>
+
+          <button class="circle-btn back-btn on-dark lg lg-sm" data-action="none" aria-label="Back" data-in style="--i:0">
+            <img src="assets/icon-arrow-left-white.svg" alt="" width="24" height="24">
+          </button>
+
+          <div class="ask-trip-card" data-in style="--i:1">
+            <img class="cover kenburns" src="assets/night-market.jpg" alt="Al Hosn night market">
+          </div>
+          <div class="ask-trip-details" data-in style="--i:2">
+            <p class="trip-name on-photo">Al Hosn Trip</p>
+            <p class="trip-duration on-photo">3 days · 22–24 Jan</p>
+          </div>
+
+          <p class="voice-answer ask-answer" id="ask-answer" aria-live="polite">Help me booking everything I need for the trip</p>
+
+          <div class="voice-bar lg" data-in style="--i:1">
+            <button class="circle-btn tool-btn tool-left lg lg-sm" aria-label="Gallery">
+              <img src="assets/icon-gallery.svg" alt="" width="22" height="22">
+            </button>
+            <div class="voice-pill lg" id="ask-pill" data-state="idle" role="button" tabindex="0" aria-label="Talk to your companion">
+              <span class="pill-glow"></span>
+              <img class="pill-idle" src="assets/voice-pill-idle.svg" alt="" width="156" height="64">
+              <span class="pill-active">
+                <img src="assets/voice-pill-active-dots.svg" alt="" width="120" height="56">
+              </span>
+            </div>
+            <button class="circle-btn tool-btn tool-right lg lg-sm" aria-label="Keyboard">
+              <img src="assets/icon-keyboard.svg" alt="" width="24" height="24">
+            </button>
+          </div>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ─────────────── Screen 2 · Booking in progress (Nana 7) ─────────────── -->
+        <section class="screen s-loading theme-light" data-screen="loading">
+          <span class="host-orb" data-in style="--i:1">
+            <img src="assets/avatar.jpg" alt="Your companion host">
+          </span>
+          <p class="user-echo" data-in style="--i:0">Help me booking everything I need for the trip</p>
+
+          <p class="ai-reply" id="loading-reply">I booked a flight <br aria-hidden="true">and rented a car for 5</p>
+
+          <article class="book-card card-flight" data-in style="--i:2">
+            <img class="card-photo photo-flight blurred" src="assets/flight.jpg" alt="">
+            <div class="skel-frost"></div>
+            <span class="skel-orb"></span>
+            <div class="skel-rows">
+              <span class="skel-bar b-sm"></span>
+              <span class="skel-bar b-full"></span>
+              <span class="skel-bar b-mid"></span>
+            </div>
+            <div class="skel-loader">
+              <span class="arc-wrap">
+                <img class="loader-arc" src="assets/loader-arc-80.svg" alt="" width="80" height="80">
+                <span class="arc-tip"></span>
+              </span>
+              <img class="sparkle sparkle-big" src="assets/sparkle-fig-lg.svg" alt="" width="29" height="29">
+              <img class="sparkle sparkle-tiny" src="assets/sparkle-fig-sm.svg" alt="" width="9" height="9">
+            </div>
+          </article>
+
+          <article class="book-card card-car" data-in style="--i:3">
+            <img class="card-photo photo-car blurred" src="assets/car.jpg" alt="">
+            <div class="skel-frost"></div>
+            <span class="skel-orb"></span>
+            <div class="skel-rows">
+              <span class="skel-bar b-sm"></span>
+              <span class="skel-bar b-full"></span>
+              <span class="skel-bar b-mid"></span>
+            </div>
+            <div class="skel-loader">
+              <img class="sparkle sparkle-big" src="assets/sparkle-fig-lg.svg" alt="" width="29" height="29">
+              <img class="sparkle sparkle-tiny" src="assets/sparkle-fig-sm.svg" alt="" width="9" height="9">
+            </div>
+          </article>
+
+          <div class="trip-bar bar-light lg" data-in style="--i:1">
+            <span class="trip-thumb"><img src="assets/night-market.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Al Hosn Trip</p>
+              <p class="tb-duration grey-text">3 days · 22–24 Jan</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
+          </div>
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+        <!-- ─────────────── Screen 3 · Booked results (Nana 8) ─────────────── -->
+        <section class="screen s-results theme-light" data-screen="results">
+          <span class="host-orb">
+            <img src="assets/avatar.jpg" alt="Your companion host">
+          </span>
+          <p class="user-echo">Help me booking everything I need for the trip</p>
+
+          <p class="ai-reply" id="results-reply">I booked a flight <br aria-hidden="true">and rented a car for 5</p>
+
+          <article class="book-card card-flight">
+            <img class="card-photo photo-flight kenburns" src="assets/flight.jpg" alt="Etihad Airways flight">
+            <div class="card-sheen"></div>
+            <div class="card-scrim"></div>
+            <img class="card-logo logo-flight" src="assets/logo-etihad.png" alt="Etihad Airways" data-in style="--i:1">
+            <div class="flight-route" data-in style="--i:2">
+              <span class="route-code">RUH</span>
+              <img src="assets/icon-airplane-ticket.svg" alt="to" width="24" height="24">
+              <span class="route-code">AUH</span>
+            </div>
+            <div class="flight-when" data-in style="--i:3">
+              <img src="assets/icon-calendar.svg" alt="" width="12" height="12">
+              <span>Nov 20 2026 - 10:AM - 2:30 H</span>
+            </div>
+            <button class="confirm-btn breathe" data-action="confirm" data-in style="--i:4">Confirm</button>
+          </article>
+
+          <article class="book-card card-car">
+            <img class="card-photo photo-car kenburns" src="assets/car.jpg" alt="Rental car">
+            <div class="card-sheen"></div>
+            <div class="card-scrim"></div>
+            <img class="card-logo logo-car" src="assets/logo-car.png" alt="Hertz" data-in style="--i:2">
+            <button class="confirm-btn" data-action="confirm" data-in style="--i:5">Confirm</button>
+          </article>
+
+          <div class="trip-bar bar-light lg">
+            <span class="trip-thumb"><img src="assets/night-market.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Al Hosn Trip</p>
+              <p class="tb-duration grey-text">3 days · 22–24 Jan</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
+          </div>
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+      </div>
+      </div>
+    </div>
+
+    <footer class="stage-controls">
+      <button class="ctrl-btn" id="nav-prev" aria-label="Previous screen">←</button>
+      <div class="step-dots" id="step-dots"></div>
+      <button class="ctrl-btn" id="nav-next" aria-label="Next screen">→</button>
+      <button class="ctrl-btn ctrl-restart" id="nav-restart">Restart</button>
+    </footer>
+  </div>
+
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>
