@@ -1034,7 +1034,11 @@ button.lg:active::after {
     scale 0.7s cubic-bezier(0.34, 1.25, 0.45, 1),
     filter 0.7s ease,
     opacity 0.7s ease,
-    box-shadow 0.7s ease;
+    box-shadow 0.7s ease,
+    /* z-order is a discrete step: held until the card has straightened and
+       seated and the neighbours are opaque again, so the 4 PM card closes
+       over it cleanly rather than snapping in front mid-fade */
+    z-index 0s linear 0.4s;
 }
 
 .s-sched[data-state="focus"] .ev-first {
@@ -1068,21 +1072,33 @@ button.lg:active::after {
    the day recedes by scale and opacity and the card pops as it lands. */
 .s-sched[data-state="landing"] .ev-first { top: 231px; opacity: 0.5; scale: 0.95; }
 .s-sched[data-state="landing"] .ev-last { opacity: 0.5; scale: 0.95; }
-/* the schedule's own middle card holds the landing geometry but stays
-   hidden — the shared #hero-card is standing on its spot; the moment the
-   state flips to stack it reappears there and simply slides into the day */
+/* the schedule's own card sits at the landing geometry, exactly beneath the
+   shared #hero-card — rendered, never hidden, so its move into the stack is
+   a real transition rather than a snap (a hidden element's geometry change
+   never renders, and the flip would jump) */
 .s-sched[data-state="landing"] .ev-mid {
   top: 290px;
   rotate: -3deg;
   z-index: 4;
-  visibility: hidden;
   box-shadow: 0 24px 48px rgba(41, 38, 47, 0.28);
+  transition-delay: 0s;              /* lifting above the stack is immediate */
 }
 
 /* a screen arriving mid-story skips its entrance so its furniture simply
    persists through the dissolve */
 .screen.active.no-entrance [data-in] { animation: none; opacity: 1; }
 
+/* returning to the stack, the day closes briskly: the neighbours are solid
+   again before the z-order flips, so the 4 PM card covers the new card
+   cleanly instead of letting it ghost through a half-faded neighbour */
+.s-sched.settling .ev-first,
+.s-sched.settling .ev-last {
+  transition-duration: 0.45s;
+  transition-delay: 0s;
+}
+
+/* the landing pop, played by whichever card is standing on the spot */
+.pop-now { animation: card-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1); }
 @keyframes card-pop {
   0%, 100% { scale: 1; }
   45% { scale: 1.045; }
@@ -1116,8 +1132,6 @@ button.lg:active::after {
 .hero-card.cut { transition: none; }
 /* its entrance on the adding screen, timed like the old card's stagger */
 .hero-card.enter { animation: rise-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.41s both; }
-/* the landing pop, once the dissolve beneath has settled */
-.hero-card.pop { animation: card-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
 /* both titles share one slot, sized for the longer of the two, so the swap
    is a cross-fade in place rather than a reflow */
 .ev-title-swap { position: relative; margin-top: 8px; height: 78px; }
@@ -1389,7 +1403,7 @@ button.lg:active::after {
   .orb-halo,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }
-  .hero-card.enter, .hero-card.pop { animation-duration: 1ms; }
+  .hero-card.enter, .pop-now { animation-duration: 1ms; }
   .hero-card { transition-duration: 1ms; }
   .qw, .voice-answer .w { transition-duration: 1ms; }
   .ev-first, .ev-mid, .ev-last,

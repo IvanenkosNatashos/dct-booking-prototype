@@ -250,16 +250,18 @@
     screen.classList.remove('no-anim');
   }
 
-  /* the shared card that rides above the screens through steps 6→8 */
+  /* the shared card that bridges the adding → schedule dissolve (steps 6→7).
+     Its only job is to stay solid while the screens cross-fade; the moment
+     the schedule is fully opaque it cuts out and the schedule's own card —
+     rendered all along at the identical geometry, directly beneath it —
+     carries the pop and the tuck into the stack. */
   const hero = document.getElementById('hero-card');
   function setHero(step) {
     const show = step === 'adding' || step === 'sched:landing';
-    // the hand-off to the schedule's own card must be a cut, not a fade —
-    // the two are pixel-identical at that instant
-    hero.classList.toggle('cut', step === 'sched:stack2');
+    // the hand-off is a cut, not a fade — the two are pixel-identical
+    hero.classList.toggle('cut', !show);
     hero.classList.toggle('on', show);
     hero.classList.toggle('enter', step === 'adding');
-    if (step !== 'sched:landing') hero.classList.remove('pop');
   }
 
   /* ── flow switcher ── */
@@ -424,7 +426,9 @@
         sched.dataset.state = 'stack';
         sched.dataset.card = 'artisans';
       });
-      sched.classList.remove('no-entrance'); // a restart earns its entrance back
+      // a restart earns its entrance back, and drops any landing leftovers
+      sched.classList.remove('no-entrance', 'settling');
+      sched.querySelector('.ev-mid').classList.remove('pop-now');
       at(2600, next);                        // the day settles, then Nana picks a card
     },
     'sched:focus'() {
@@ -460,17 +464,26 @@
       at(3200, next);
     },
     'sched:landing'() {
-      // the day reassembles around the shared card, which never moved — it
-      // rides above the dissolve, pops as it lands, and tucks straight into
-      // the stack on the pop's settle: one continuous gesture
+      // the day reassembles around the card, which never moved
       sched.dataset.card = 'hosn';
       sched.dataset.state = 'landing';
-      at(650, () => hero.classList.add('pop'));
-      at(1260, next);                        // pop ends at 1200; tuck follows through
+      const mid = sched.querySelector('.ev-mid');
+      mid.classList.remove('pop-now');
+      at(700, () => {
+        // dissolve is done (680ms): hand off to the real stack card and pop it
+        hero.classList.add('cut');
+        hero.classList.remove('on');
+        mid.classList.add('pop-now');
+      });
+      at(1260, next);                        // pop ends at 1250; the tuck follows through
     },
     'sched:stack2'() {
-      sched.dataset.state = 'stack';         // …and settles into the day
+      const mid = sched.querySelector('.ev-mid');
+      mid.classList.remove('pop-now');        // free `scale` for the tuck transition
+      sched.classList.add('settling');        // neighbours close in a beat later
+      sched.dataset.state = 'stack';          // …and the card slides into the day
       sched.dataset.card = 'hosn';
+      at(1000, () => sched.classList.remove('settling'));
     },
   };
 
@@ -501,7 +514,10 @@
     },
     voice2() { unlit(v2Answer); v2Orb.classList.remove('orb-live'); },
     adding() { unlit(adText); },
-    sched() { sched.classList.remove('no-entrance'); },
+    sched() {
+      sched.classList.remove('no-entrance', 'settling');
+      sched.querySelector('.ev-mid').classList.remove('pop-now');
+    },
     search() {},
   };
 
