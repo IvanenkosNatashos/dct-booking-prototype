@@ -383,6 +383,13 @@ button.lg:active::after {
 }
 /* the loading → results dissolve gets extra room to breathe */
 .phone-screens.slow-swap .screen { transition-duration: 1150ms; }
+/* a flat dissolve for swaps where an element must appear not to move:
+   scale snaps to 1 (dropped from the transition) so only opacity fades and
+   the shared card stays pixel-identical through the swap */
+.phone-screens.flat-swap .screen {
+  transform: scale(1);
+  transition: opacity var(--screen-ms) var(--ease-out);
+}
 
 .theme-light { background: var(--bg-light); }
 /* dot grid on light screens (as in the Figma canvas texture) */
@@ -1011,6 +1018,7 @@ button.lg:active::after {
     top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
     height 0.85s cubic-bezier(0.22, 1, 0.36, 1),
     rotate 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.85s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.7s ease,
     opacity 0.7s ease,
     box-shadow 0.7s ease;
@@ -1040,6 +1048,35 @@ button.lg:active::after {
 }
 [data-card="hosn"] .mid-hosn, [data-card="hosn"] .mid-title-hosn { opacity: 1; }
 [data-card="hosn"] .mid-artisans, [data-card="hosn"] .mid-title-artisans { opacity: 0; }
+
+/* ── seamless landing (steps 6→7→8) ──
+   The reworked card holds the exact geometry it had on the adding screen,
+   so the cross-dissolve never shows it move; no blur here — the rest of
+   the day recedes by scale and opacity and the card pops as it lands. */
+.s-sched[data-state="landing"] .ev-first { top: 231px; opacity: 0.5; scale: 0.95; }
+.s-sched[data-state="landing"] .ev-last { opacity: 0.5; scale: 0.95; }
+.s-sched[data-state="landing"] .ev-mid {
+  top: 290px;
+  rotate: -3deg;
+  z-index: 4;
+  box-shadow: 0 24px 48px rgba(41, 38, 47, 0.28);
+}
+
+/* a screen arriving mid-story skips its entrance so its furniture simply
+   persists through the dissolve (the pop rule below must stay later in
+   the file — it out-competes this animation:none by source order) */
+.screen.active.no-entrance [data-in] { animation: none; opacity: 1; }
+.s-sched.active[data-state="landing"] .ev-mid {
+  animation: card-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
+}
+@keyframes card-pop {
+  0%, 100% { scale: 1; }
+  45% { scale: 1.045; }
+}
+
+/* transition kill-switch: preset a screen's geometry before it reveals
+   (children only — the screen's own dissolve must survive) */
+.no-anim * { transition: none !important; }
 /* both titles share one slot, sized for the longer of the two, so the swap
    is a cross-fade in place rather than a reflow */
 .ev-title-swap { position: relative; margin-top: 8px; height: 78px; }
@@ -1260,9 +1297,12 @@ button.lg:active::after {
 
 /* ── Adding to your itinerary (frame 6) ── */
 
+/* pinned to the same geometry as the schedule's landing card, so the
+   6→7 dissolve never shows the card itself move */
 .ad-card {
-  top: 256px;
+  top: 290px;
   height: 287px;
+  rotate: -3deg;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
 }
 
@@ -1317,6 +1357,7 @@ button.lg:active::after {
   .orb-halo,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }
+  .s-sched.active[data-state="landing"] .ev-mid { animation: none; }
   .qw, .voice-answer .w { transition-duration: 1ms; }
   .ev-first, .ev-mid, .ev-last,
   .sk-card, .sug-card, .tab-glider,

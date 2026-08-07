@@ -19,7 +19,7 @@
     booking: ['ask', 'loading', 'results'],
     rework: [
       'sched:stack', 'sched:focus', 'voice2', 'search:searching',
-      'search:results', 'adding', 'sched:focus2', 'sched:stack2',
+      'search:results', 'adding', 'sched:landing', 'sched:stack2',
     ],
   };
 
@@ -198,18 +198,31 @@
     clearTimers();
     if (changedScreen) EXIT[prevScreen] && EXIT[prevScreen]();
 
-    // the two dissolves that carry the most weight get extra room
-    if ((prev === 'loading' && next === 'results') ||
-        (prevScreen === 'adding' && nextScreen === 'sched')) {
+    // the dissolve that carries the most weight gets extra room
+    // (adding → sched is deliberately NOT slow: the card holds one geometry
+    // across it, and a fast dissolve is what sells the continuity)
+    if (prev === 'loading' && next === 'results') {
       phoneScreens.classList.add('slow-swap');
       setTimeout(() => phoneScreens.classList.remove('slow-swap'), 1300);
+    }
+    // the card that must appear not to move gets a zoom-free dissolve
+    if (nextScreen === 'sched' && prevScreen === 'adding') {
+      phoneScreens.classList.add('flat-swap');
+      setTimeout(() => phoneScreens.classList.remove('flat-swap'), 800);
     }
 
     stepIndex = i;
 
     if (changedScreen) {
       screens[prevScreen].classList.remove('active');
-      if (replay) restartEntrance(screens[nextScreen]);
+      PRE[next] && PRE[next]();
+      if (next === 'sched:landing') {
+        // arriving mid-story: geometry is preset, furniture persists
+        screens.sched.classList.add('no-entrance');
+      } else if (replay) {
+        screens[nextScreen].classList.remove('no-entrance');
+        restartEntrance(screens[nextScreen]);
+      }
       screens[nextScreen].classList.add('active');
       positionAllGliders();
     }
@@ -226,6 +239,14 @@
     const skip = ['loading', 'search:searching', 'adding'];
     if (skip.includes(FLOW[target])) target -= 1;
     goStep(target);
+  }
+
+  /* preset a screen's geometry before its reveal, children untransitioned */
+  function snap(screen, fn) {
+    screen.classList.add('no-anim');
+    fn();
+    void screen.offsetWidth;
+    screen.classList.remove('no-anim');
   }
 
   /* ── flow switcher ── */
@@ -384,8 +405,12 @@
 
     /* ── rework ── */
     'sched:stack'() {
-      sched.dataset.state = 'stack';
-      sched.dataset.card = 'artisans';
+      // snap, don't slide: on entry or restart the original day is simply there
+      snap(sched, () => {
+        sched.dataset.state = 'stack';
+        sched.dataset.card = 'artisans';
+      });
+      sched.classList.remove('no-entrance'); // a restart earns its entrance back
       at(2600, next);                        // the day settles, then Nana picks a card
     },
     'sched:focus'() {
@@ -420,15 +445,26 @@
       at(500, () => lit(adText));
       at(3200, next);
     },
-    'sched:focus2'() {
-      // the day comes back holding the new activity, still in the companion's hand
+    'sched:landing'() {
+      // the day reassembles around the new card, which never moved — it holds
+      // the adding screen's exact geometry through the dissolve, then pops
       sched.dataset.card = 'hosn';
-      sched.dataset.state = 'focus';
-      at(2400, next);
+      sched.dataset.state = 'landing';
+      at(2000, next);
     },
     'sched:stack2'() {
       sched.dataset.state = 'stack';         // …and settles into the day
       sched.dataset.card = 'hosn';
+    },
+  };
+
+  /* geometry to preset before a screen's reveal (runs pre-activation) */
+  const PRE = {
+    'sched:landing'() {
+      snap(sched, () => {
+        sched.dataset.card = 'hosn';
+        sched.dataset.state = 'landing';
+      });
     },
   };
 
@@ -449,7 +485,7 @@
     },
     voice2() { unlit(v2Answer); v2Orb.classList.remove('orb-live'); },
     adding() { unlit(adText); },
-    sched() {},
+    sched() { sched.classList.remove('no-entrance'); },
     search() {},
   };
 
