@@ -1023,6 +1023,19 @@ button.lg:active::after {
     opacity 0.7s ease,
     box-shadow 0.7s ease;
 }
+/* the reworked card moves with a quicker, faintly overshooting spring, so
+   lifting out of — and tucking back into — the stack reads as a snug slot-in
+   while the neighbours close around it a beat later */
+.ev-mid {
+  transition:
+    top 0.7s cubic-bezier(0.34, 1.25, 0.45, 1),
+    height 0.7s cubic-bezier(0.34, 1.25, 0.45, 1),
+    rotate 0.7s cubic-bezier(0.34, 1.25, 0.45, 1),
+    scale 0.7s cubic-bezier(0.34, 1.25, 0.45, 1),
+    filter 0.7s ease,
+    opacity 0.7s ease,
+    box-shadow 0.7s ease;
+}
 
 .s-sched[data-state="focus"] .ev-first {
   top: 231px;
@@ -1104,7 +1117,7 @@ button.lg:active::after {
 /* its entrance on the adding screen, timed like the old card's stagger */
 .hero-card.enter { animation: rise-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.41s both; }
 /* the landing pop, once the dissolve beneath has settled */
-.hero-card.pop { animation: card-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.hero-card.pop { animation: card-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
 /* both titles share one slot, sized for the longer of the two, so the swap
    is a cross-fade in place rather than a reflow */
 .ev-title-swap { position: relative; margin-top: 8px; height: 78px; }

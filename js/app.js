@@ -461,11 +461,12 @@
     },
     'sched:landing'() {
       // the day reassembles around the shared card, which never moved — it
-      // rides above the dissolve, then pops once the schedule has settled
+      // rides above the dissolve, pops as it lands, and tucks straight into
+      // the stack on the pop's settle: one continuous gesture
       sched.dataset.card = 'hosn';
       sched.dataset.state = 'landing';
-      at(700, () => hero.classList.add('pop'));
-      at(2000, next);
+      at(650, () => hero.classList.add('pop'));
+      at(1260, next);                        // pop ends at 1200; tuck follows through
     },
     'sched:stack2'() {
       sched.dataset.state = 'stack';         // …and settles into the day
