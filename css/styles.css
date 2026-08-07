@@ -49,6 +49,10 @@
   /* motion */
   --ease-out: cubic-bezier(0.22, 0.68, 0.26, 1);
   --screen-ms: 680ms;
+  /* how far a card tilts when it is out of the stack — kept as one value so
+     the adding card and the card it lands as can never drift apart */
+  --tilt-held: -1.1deg;
+  --tilt-voice: -0.4deg;
 }
 
 * {
@@ -1078,7 +1082,7 @@ button.lg:active::after {
    never renders, and the flip would jump) */
 .s-sched[data-state="landing"] .ev-mid {
   top: 290px;
-  rotate: -3deg;
+  rotate: var(--tilt-held);
   z-index: 4;
   box-shadow: 0 24px 48px rgba(41, 38, 47, 0.28);
   transition-delay: 0s;              /* lifting above the stack is immediate */
@@ -1115,7 +1119,7 @@ button.lg:active::after {
 .hero-card {
   top: 290px;
   height: 287px;
-  rotate: -3deg;
+  rotate: var(--tilt-held);       /* must match the landing card exactly */
   z-index: 40;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
   pointer-events: none;
@@ -1166,7 +1170,7 @@ button.lg:active::after {
 .v2-card {
   top: 272px;
   height: 287px;
-  rotate: -1deg;
+  rotate: var(--tilt-voice);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
 }
 
