@@ -417,15 +417,7 @@
             <button class="day-tab" data-day="3">Day 3</button>
           </nav>
 
-          <article class="ev-card ad-card" data-in style="--i:2">
-            <img class="ev-photo kenburns" src="assets/ev-hosn.jpg" alt="Qasr Al Hosn">
-            <div class="ev-scrim"></div>
-            <div class="ev-sheen"></div>
-            <div class="ev-meta">
-              <p class="ev-time">02:00 PM</p>
-              <p class="ev-title">Discover heritage of Qasr Al Hosn</p>
-            </div>
-          </article>
+          <!-- the card itself is the shared #hero-card, riding above the screens -->
 
           <div class="v2-fade"></div>
           <div class="ad-loader">
@@ -439,6 +431,20 @@
           <p class="voice-answer ad-text" id="ad-text">Adding to your Itinerary</p>
           <div class="home-indicator hi-light"></div>
         </section>
+
+        <!-- ── the reworked card, shared across steps 6→8 ──
+             One element riding above the screens from the adding moment until
+             the schedule takes over, so the card can never blink or double
+             during a dissolve. -->
+        <article class="ev-card hero-card" id="hero-card" aria-hidden="true">
+          <img class="ev-photo kenburns" src="assets/ev-hosn.jpg" alt="">
+          <div class="ev-scrim"></div>
+          <div class="ev-sheen"></div>
+          <div class="ev-meta">
+            <p class="ev-time">02:00 PM</p>
+            <p class="ev-title">Discover heritage of Qasr Al Hosn</p>
+          </div>
+        </article>
 
       </div>
       </div>

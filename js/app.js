@@ -212,6 +212,7 @@
     }
 
     stepIndex = i;
+    setHero(next);
 
     if (changedScreen) {
       screens[prevScreen].classList.remove('active');
@@ -249,6 +250,18 @@
     screen.classList.remove('no-anim');
   }
 
+  /* the shared card that rides above the screens through steps 6→8 */
+  const hero = document.getElementById('hero-card');
+  function setHero(step) {
+    const show = step === 'adding' || step === 'sched:landing';
+    // the hand-off to the schedule's own card must be a cut, not a fade —
+    // the two are pixel-identical at that instant
+    hero.classList.toggle('cut', step === 'sched:stack2');
+    hero.classList.toggle('on', show);
+    hero.classList.toggle('enter', step === 'adding');
+    if (step !== 'sched:landing') hero.classList.remove('pop');
+  }
+
   /* ── flow switcher ── */
   const flowTabs = document.getElementById('flow-tabs');
   function positionFlowGlider() {
@@ -279,6 +292,7 @@
     stepIndex = -1;                          // force goStep to treat this as new
     const first = FLOW[0];
     stepIndex = 0;
+    setHero(first);
     restartEntrance(screens[stepScreen(first)]);
     screens[stepScreen(first)].classList.add('active');
     positionAllGliders();
@@ -446,10 +460,11 @@
       at(3200, next);
     },
     'sched:landing'() {
-      // the day reassembles around the new card, which never moved — it holds
-      // the adding screen's exact geometry through the dissolve, then pops
+      // the day reassembles around the shared card, which never moved — it
+      // rides above the dissolve, then pops once the schedule has settled
       sched.dataset.card = 'hosn';
       sched.dataset.state = 'landing';
+      at(700, () => hero.classList.add('pop'));
       at(2000, next);
     },
     'sched:stack2'() {
