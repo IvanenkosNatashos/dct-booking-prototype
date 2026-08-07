@@ -1188,7 +1188,6 @@ button.lg:active::after {
 .sk-loader { left: 50%; top: 96px; margin-left: -36px; width: 72px; height: 72px; }
 .sk-loader .sparkle-big { left: 22px; top: 24px; }
 .sk-loader .sparkle-tiny { left: 41px; top: 20px; }
-.arc-lag { animation-delay: -0.5s; }
 
 .sk-rows {
   position: absolute;
