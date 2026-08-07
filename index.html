@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <title>Al Hosn Trip · Booking · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="css/styles.css?v=1">
+  <title>Al Hosn Trip · DCT Companion Prototype</title>
+  <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
   <!-- Liquid Glass lens filters: organic displacement of the backdrop,
@@ -29,9 +29,10 @@
   <div class="stage">
     <header class="stage-caption">
       <span class="caption-brand">DCT · Visit Abu Dhabi</span>
-      <nav class="flow-tabs" aria-label="Journey">
-        <span class="flow-glider solo" aria-hidden="true"></span>
+      <nav class="flow-tabs" id="flow-tabs" aria-label="Journey">
+        <span class="flow-glider" aria-hidden="true"></span>
         <button class="flow-tab active" data-flow="booking">Nana · Booking the trip</button>
+        <button class="flow-tab" data-flow="rework">Nana · Reworking the day</button>
       </nav>
     </header>
 
@@ -182,6 +183,263 @@
           <div class="home-indicator hi-dark"></div>
         </section>
 
+        <!-- ═══════ Rework flow · Schedule (stack ⇄ focus) · frames 1, 2, 7, 8 ═══════
+             One screen, two states. `data-state` lifts the middle card out of the
+             stack; `data-card` swaps which spot sits in that middle slot, so the
+             day comes back from the companion holding the newly-added activity. -->
+        <section class="screen s-sched theme-light" data-screen="sched" data-state="stack" data-card="artisans">
+          <span class="host-orb" data-in style="--i:1">
+            <img src="assets/avatar-nana.jpg" alt="Your companion host">
+          </span>
+
+          <nav class="day-tabs lg" data-tabs="day" aria-label="Trip days" data-in style="--i:0">
+            <span class="tab-glider" aria-hidden="true"></span>
+            <button class="day-tab active" data-day="1">Day 1</button>
+            <button class="day-tab" data-day="2">Day 2</button>
+            <button class="day-tab" data-day="3">Day 3</button>
+          </nav>
+
+          <div class="sched-stack">
+            <article class="ev-card ev-first" data-in style="--i:2">
+              <img class="ev-photo kenburns" src="assets/ev-mosque.jpg" alt="">
+              <div class="ev-scrim"></div>
+              <div class="ev-meta">
+                <p class="ev-time">10:00 AM</p>
+                <p class="ev-title">Grand Mosque Abu Dhabi</p>
+              </div>
+            </article>
+
+            <!-- the middle slot: the card the companion reworks -->
+            <article class="ev-card ev-mid" data-in style="--i:3">
+              <img class="ev-photo mid-artisans kenburns" src="assets/ev-artisans.jpg" alt="">
+              <img class="ev-photo mid-hosn kenburns" src="assets/ev-hosn.jpg" alt="">
+              <div class="ev-scrim"></div>
+              <div class="ev-meta">
+                <p class="ev-time">02:00 PM</p>
+                <div class="ev-title-swap">
+                  <p class="ev-title mid-title-artisans">House of Artisans</p>
+                  <p class="ev-title mid-title-hosn">Discover heritage of Qasr Al Hosn</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="ev-card ev-last" data-in style="--i:4">
+              <img class="ev-photo kenburns" src="assets/ev-festival.jpg" alt="">
+              <div class="ev-scrim"></div>
+              <div class="ev-meta">
+                <p class="ev-time">04:00 PM</p>
+                <p class="ev-title">Al Hosn Festival</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="bottom-veil"></div>
+          <div class="trip-bar bar-light lg" data-in style="--i:2">
+            <span class="trip-thumb"><img src="assets/night-market.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Al Hosn Trip</p>
+              <p class="tb-duration grey-text">3 days · 22–24 Jan</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
+          </div>
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+        <!-- ═══════ Rework flow · Voice input (frame 3) ═══════ -->
+        <section class="screen s-voice2" data-screen="voice2">
+          <div class="v2-backdrop">
+            <img class="cover" src="assets/ev-artisans.jpg" alt="">
+            <div class="v2-grad"></div>
+          </div>
+
+          <span class="host-orb" data-in style="--i:1">
+            <img src="assets/avatar-nana.jpg" alt="Your companion host">
+          </span>
+
+          <nav class="day-tabs lg" data-tabs="day" aria-label="Trip days" data-in style="--i:0">
+            <span class="tab-glider" aria-hidden="true"></span>
+            <button class="day-tab active" data-day="1">Day 1</button>
+            <button class="day-tab" data-day="2">Day 2</button>
+            <button class="day-tab" data-day="3">Day 3</button>
+          </nav>
+
+          <article class="ev-card v2-card" data-in style="--i:2">
+            <img class="ev-photo kenburns" src="assets/ev-artisans.jpg" alt="House of Artisans">
+            <div class="ev-scrim"></div>
+            <div class="ev-meta">
+              <p class="ev-time">02:00 PM</p>
+              <p class="ev-title">House of Artisans</p>
+            </div>
+          </article>
+
+          <div class="v2-fade"></div>
+          <p class="voice-answer v2-answer" id="v2-answer" aria-live="polite">What we can do instead of going there?</p>
+
+          <button class="orb orb-solo lg lg-sm" id="v2-orb" data-action="none" aria-label="Talk to your companion">
+            <span class="orb-halo" aria-hidden="true"></span>
+            <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+          </button>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ═══════ Rework flow · Searching ⇄ Here you go (frames 4, 5) ═══════
+             One screen: the skeletons and the results occupy the same two slots,
+             so the answer resolves in place instead of arriving as a new page. -->
+        <section class="screen s-search theme-light" data-screen="search" data-state="searching">
+          <span class="host-orb" data-in style="--i:1">
+            <img src="assets/avatar-nana.jpg" alt="Your companion host">
+          </span>
+
+          <nav class="day-tabs lg" data-tabs="day" aria-label="Trip days" data-in style="--i:0">
+            <span class="tab-glider" aria-hidden="true"></span>
+            <button class="day-tab active" data-day="1">Day 1</button>
+            <button class="day-tab" data-day="2">Day 2</button>
+            <button class="day-tab" data-day="3">Day 3</button>
+          </nav>
+
+          <!-- the day either side of the answer, pushed out of focus -->
+          <article class="ev-card se-ghost se-ghost-top">
+            <img class="ev-photo" src="assets/ev-mosque.jpg" alt="">
+            <div class="ev-scrim"></div>
+            <div class="ev-meta">
+              <p class="ev-time">10:00 AM</p>
+              <p class="ev-title">Grand Mosque Abu Dhabi</p>
+            </div>
+          </article>
+          <article class="ev-card se-ghost se-ghost-bottom">
+            <img class="ev-photo" src="assets/ev-festival.jpg" alt="">
+            <div class="ev-scrim"></div>
+            <div class="ev-meta">
+              <p class="ev-time">04:00 PM</p>
+              <p class="ev-title">Al Hosn Festival</p>
+            </div>
+          </article>
+
+          <p class="se-heading" id="se-searching">Searching...</p>
+          <p class="se-heading" id="se-hereyougo">Here you go</p>
+
+          <div class="se-row">
+            <div class="se-slot">
+              <!-- skeleton and result share the slot; only one is ever lit -->
+              <div class="sk-card">
+                <img class="sk-photo" src="assets/sug-heritage.jpg" alt="">
+                <div class="sk-tint"></div>
+                <div class="skel-loader sk-loader">
+                  <span class="arc-wrap">
+                    <img class="loader-arc" src="assets/loader-arc-80.svg" alt="" width="72" height="72">
+                    <span class="arc-tip"></span>
+                  </span>
+                  <img class="sparkle sparkle-big" src="assets/sparkle-fig-lg.svg" alt="" width="26" height="26">
+                  <img class="sparkle sparkle-tiny" src="assets/sparkle-fig-sm.svg" alt="" width="8" height="8">
+                </div>
+                <div class="sk-rows">
+                  <span class="skel-bar b-sm"></span>
+                  <span class="skel-bar b-full"></span>
+                  <span class="skel-bar b-mid"></span>
+                </div>
+              </div>
+              <article class="sug-card">
+                <img class="sug-thumb" src="assets/sug-heritage.jpg" alt="">
+                <div class="sug-text">
+                  <p class="sug-time">02:00 PM</p>
+                  <p class="sug-title">Discover heritage of Qasr Al Hosn</p>
+                </div>
+                <button class="add-btn" id="add-heritage" data-action="none">
+                  <img src="assets/icon-add.svg" alt="" width="24" height="24">
+                  <span>Add</span>
+                </button>
+              </article>
+            </div>
+
+            <div class="se-slot">
+              <div class="sk-card">
+                <img class="sk-photo" src="assets/sug-secrets.jpg" alt="">
+                <div class="sk-tint"></div>
+                <div class="skel-loader sk-loader">
+                  <span class="arc-wrap arc-lag">
+                    <img class="loader-arc" src="assets/loader-arc-80.svg" alt="" width="72" height="72">
+                    <span class="arc-tip"></span>
+                  </span>
+                  <img class="sparkle sparkle-big" src="assets/sparkle-fig-lg.svg" alt="" width="26" height="26">
+                  <img class="sparkle sparkle-tiny" src="assets/sparkle-fig-sm.svg" alt="" width="8" height="8">
+                </div>
+                <div class="sk-rows">
+                  <span class="skel-bar b-sm"></span>
+                  <span class="skel-bar b-full"></span>
+                  <span class="skel-bar b-mid"></span>
+                </div>
+              </div>
+              <article class="sug-card">
+                <img class="sug-thumb" src="assets/sug-secrets.jpg" alt="">
+                <div class="sug-text">
+                  <p class="sug-time">02:00 PM</p>
+                  <p class="sug-title">Secrets of Qasr Al Hosn</p>
+                </div>
+                <button class="add-btn" data-action="none">
+                  <img src="assets/icon-add.svg" alt="" width="24" height="24">
+                  <span>Add</span>
+                </button>
+              </article>
+            </div>
+          </div>
+
+          <div class="bottom-veil"></div>
+          <div class="trip-bar bar-light lg" data-in style="--i:2">
+            <span class="trip-thumb"><img src="assets/night-market.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Al Hosn Trip</p>
+              <p class="tb-duration grey-text">3 days · 22–24 Jan</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
+          </div>
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+        <!-- ═══════ Rework flow · Adding to your itinerary (frame 6) ═══════ -->
+        <section class="screen s-adding" data-screen="adding">
+          <div class="v2-backdrop">
+            <img class="cover" src="assets/ev-hosn.jpg" alt="">
+            <div class="v2-grad"></div>
+          </div>
+
+          <span class="host-orb" data-in style="--i:1">
+            <img src="assets/avatar-nana.jpg" alt="Your companion host">
+          </span>
+
+          <nav class="day-tabs lg" data-tabs="day" aria-label="Trip days" data-in style="--i:0">
+            <span class="tab-glider" aria-hidden="true"></span>
+            <button class="day-tab active" data-day="1">Day 1</button>
+            <button class="day-tab" data-day="2">Day 2</button>
+            <button class="day-tab" data-day="3">Day 3</button>
+          </nav>
+
+          <article class="ev-card ad-card" data-in style="--i:2">
+            <img class="ev-photo kenburns" src="assets/ev-hosn.jpg" alt="Qasr Al Hosn">
+            <div class="ev-scrim"></div>
+            <div class="ev-sheen"></div>
+            <div class="ev-meta">
+              <p class="ev-time">02:00 PM</p>
+              <p class="ev-title">Discover heritage of Qasr Al Hosn</p>
+            </div>
+          </article>
+
+          <div class="v2-fade"></div>
+          <div class="ad-loader">
+            <span class="arc-wrap">
+              <img class="loader-arc" src="assets/loader-arc-80.svg" alt="" width="104" height="104">
+              <span class="arc-tip big"></span>
+            </span>
+            <img class="sparkle sparkle-big" src="assets/sparkle-fig-lg.svg" alt="" width="38" height="38">
+            <img class="sparkle sparkle-tiny" src="assets/sparkle-fig-sm.svg" alt="" width="12" height="12">
+          </div>
+          <p class="voice-answer ad-text" id="ad-text">Adding to your Itinerary</p>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
       </div>
       </div>
     </div>
@@ -194,6 +452,6 @@
     </footer>
   </div>
 
-  <script src="js/app.js?v=1"></script>
+  <script src="js/app.js?v=2"></script>
 </body>
 </html>

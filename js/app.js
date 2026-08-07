@@ -1,17 +1,37 @@
 /* ═══════════════════════════════════════════════════════════════════
-   DCT · Al Hosn Trip — booking flow prototype
-   Guided flow: voice ask → booking in progress → booked results
+   DCT · Al Hosn Trip — companion prototypes
+   Two guided flows, one app:
+     booking · voice ask → booking in progress → booked results
+     rework  · schedule → focus → voice → searching → results
+               → adding → schedule (updated) → schedule (arranged)
    Shell + motion grammar shared with the companion prototype.
+
+   A flow is a list of STEPS, not screens: a step is "screen" or
+   "screen:state". Consecutive steps on one screen change its state in
+   place, so the card that lifts out of the stack really moves instead
+   of cross-fading into a near-identical frame.
    ═══════════════════════════════════════════════════════════════════ */
 
 (() => {
   'use strict';
 
-  const FLOW = ['ask', 'loading', 'results'];
+  const FLOWS = {
+    booking: ['ask', 'loading', 'results'],
+    rework: [
+      'sched:stack', 'sched:focus', 'voice2', 'search:searching',
+      'search:results', 'adding', 'sched:focus2', 'sched:stack2',
+    ],
+  };
+
   const screens = {};
   document.querySelectorAll('.screen').forEach(s => { screens[s.dataset.screen] = s; });
 
-  let current = 'ask';
+  let activeFlow = 'booking';
+  let FLOW = FLOWS[activeFlow];
+  let stepIndex = 0;
+
+  const stepScreen = step => step.split(':')[0];
+  const stepState = step => step.split(':')[1] || '';
 
   /* ─────────────────────── Phone scaling ─────────────────────── */
 
@@ -48,19 +68,34 @@
     })();
   }
 
-  /* finger-press ripple inside the phone */
+  /* a ripple in phone-space, from a real press or a scripted one */
+  function ripple(x, y) {
+    const r = document.createElement('span');
+    r.className = 'tap-ripple';
+    r.style.left = `${x}px`;
+    r.style.top = `${y}px`;
+    phoneScreens.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+  }
+
   document.addEventListener('pointerdown', e => {
     const rect = phoneScreens.getBoundingClientRect();
     if (e.clientX < rect.left || e.clientX > rect.right ||
         e.clientY < rect.top || e.clientY > rect.bottom) return;
     const scale = rect.width / 390;
-    const r = document.createElement('span');
-    r.className = 'tap-ripple';
-    r.style.left = `${(e.clientX - rect.left) / scale}px`;
-    r.style.top = `${(e.clientY - rect.top) / scale}px`;
-    phoneScreens.appendChild(r);
-    setTimeout(() => r.remove(), 700);
+    ripple((e.clientX - rect.left) / scale, (e.clientY - rect.top) / scale);
   });
+
+  /* the companion tapping for you — same ripple, same button press */
+  function ghostTap(el) {
+    const pr = phoneScreens.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    const scale = pr.width / 390;
+    ripple((er.left + er.width / 2 - pr.left) / scale,
+           (er.top + er.height / 2 - pr.top) / scale);
+    el.classList.add('pressed');
+    setTimeout(() => el.classList.remove('pressed'), 260);
+  }
 
   /* ─────────────── Spoken-word helpers (conversation feel) ─────────────── */
 
@@ -94,7 +129,7 @@
 
   /* answer words carry their own slice of the shared gradient so per-word
      animation can't break background-clip:text */
-  function sliceGradient(el) {
+  function sliceGradient(el, stops = '#ffffff 0%, rgba(255,255,255,0.2) 100%') {
     const words = el.textContent.trim().split(/\s+/);
     el.textContent = '';
     words.forEach((word, i) => {
@@ -107,7 +142,7 @@
     document.fonts.ready.then(() => {
       const total = el.clientWidth;
       el.querySelectorAll('.w').forEach(span => {
-        span.style.background = `linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0.2) 100%)`;
+        span.style.background = `linear-gradient(90deg, ${stops})`;
         span.style.backgroundSize = `${total}px 100%`;
         span.style.backgroundPosition = `-${span.offsetLeft}px 0`;
         span.style.webkitBackgroundClip = 'text';
@@ -118,6 +153,8 @@
       el.style.color = 'transparent';
     });
   }
+  const lit = el => el.querySelectorAll('.w').forEach(w => w.classList.add('on'));
+  const unlit = el => el.querySelectorAll('.w').forEach(w => w.classList.remove('on'));
 
   /* "done talking" — a confirming pop as the pill settles back to idle */
   function pillDone(pill) {
@@ -126,54 +163,113 @@
     setTimeout(() => pill.classList.remove('pill-done'), 600);
   }
 
-  /* ─────────────────────── Navigation ─────────────────────── */
+  /* ─────────────────────── Step machine ─────────────────────── */
+
+  let timers = [];
+  const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
 
   const stepDots = document.getElementById('step-dots');
-  FLOW.forEach(() => stepDots.appendChild(document.createElement('span')));
-
+  function buildDots() {
+    stepDots.innerHTML = '';
+    FLOW.forEach(() => stepDots.appendChild(document.createElement('span')));
+  }
   function renderDots() {
-    [...stepDots.children].forEach((d, i) =>
-      d.classList.toggle('on', FLOW[i] === current));
+    [...stepDots.children].forEach((d, i) => d.classList.toggle('on', i === stepIndex));
   }
 
-  function goto(name) {
-    if (!screens[name] || name === current) return;
-    if (current === 'ask') stopAskSequence();
-    if (current === 'loading') stopLoadingSequence();
-    if (current === 'results') stopResults();
-    // the skeleton → results morph gets a longer dissolve
-    if (current === 'loading' && name === 'results') {
+  /* screens whose entrance animations must replay when they are re-entered */
+  function restartEntrance(el) {
+    el.querySelectorAll('[data-in]').forEach(n => {
+      n.style.animation = 'none';
+      void n.offsetWidth;                    // force reflow, then hand back to CSS
+      n.style.animation = '';
+    });
+  }
+
+  function goStep(i, { replay = true } = {}) {
+    if (i < 0 || i >= FLOW.length) return;
+    const prev = FLOW[stepIndex];
+    const next = FLOW[i];
+    const prevScreen = stepScreen(prev);
+    const nextScreen = stepScreen(next);
+    const changedScreen = prevScreen !== nextScreen || !screens[prevScreen].classList.contains('active');
+
+    clearTimers();
+    if (changedScreen) EXIT[prevScreen] && EXIT[prevScreen]();
+
+    // the two dissolves that carry the most weight get extra room
+    if ((prev === 'loading' && next === 'results') ||
+        (prevScreen === 'adding' && nextScreen === 'sched')) {
       phoneScreens.classList.add('slow-swap');
       setTimeout(() => phoneScreens.classList.remove('slow-swap'), 1300);
     }
-    screens[current].classList.remove('active');
-    screens[name].classList.add('active');
-    current = name;
+
+    stepIndex = i;
+
+    if (changedScreen) {
+      screens[prevScreen].classList.remove('active');
+      if (replay) restartEntrance(screens[nextScreen]);
+      screens[nextScreen].classList.add('active');
+      positionAllGliders();
+    }
+
+    const enter = STEP[next];
+    if (enter) enter({ changedScreen });
     renderDots();
-    if (name === 'ask') startAskSequence();
-    if (name === 'loading') startLoadingSequence();
-    if (name === 'results') startResults();
   }
 
-  function next() {
-    const i = FLOW.indexOf(current);
-    if (i >= FLOW.length - 1) return;
-    goto(FLOW[i + 1]);
-  }
+  const next = () => goStep(stepIndex + 1);
   function prev() {
-    const i = FLOW.indexOf(current);
-    if (i <= 0) return;
-    // never step back into the auto-forwarding loader
-    const target = FLOW[i - 1] === 'loading' ? 'ask' : FLOW[i - 1];
-    goto(target);
+    // never step back into an auto-forwarding loader
+    let target = stepIndex - 1;
+    const skip = ['loading', 'search:searching', 'adding'];
+    if (skip.includes(FLOW[target])) target -= 1;
+    goStep(target);
+  }
+
+  /* ── flow switcher ── */
+  const flowTabs = document.getElementById('flow-tabs');
+  function positionFlowGlider() {
+    const active = flowTabs.querySelector('.flow-tab.active');
+    const glider = flowTabs.querySelector('.flow-glider');
+    if (!active || !glider) return;
+    glider.style.width = `${active.offsetWidth}px`;
+    glider.style.translate = `${active.offsetLeft}px 0`;
+  }
+  flowTabs.addEventListener('click', e => {
+    const tab = e.target.closest('.flow-tab');
+    if (!tab || tab.classList.contains('active')) return;
+    flowTabs.querySelectorAll('.flow-tab').forEach(b => b.classList.remove('active'));
+    tab.classList.add('active');
+    positionFlowGlider();
+    startFlow(tab.dataset.flow);
+  });
+  document.fonts.ready.then(positionFlowGlider);
+  window.addEventListener('resize', positionFlowGlider);
+
+  function startFlow(name) {
+    clearTimers();
+    EXIT[stepScreen(FLOW[stepIndex])] && EXIT[stepScreen(FLOW[stepIndex])]();
+    screens[stepScreen(FLOW[stepIndex])].classList.remove('active');
+    activeFlow = name;
+    FLOW = FLOWS[name];
+    buildDots();
+    stepIndex = -1;                          // force goStep to treat this as new
+    const first = FLOW[0];
+    stepIndex = 0;
+    restartEntrance(screens[stepScreen(first)]);
+    screens[stepScreen(first)].classList.add('active');
+    positionAllGliders();
+    STEP[first] && STEP[first]({ changedScreen: true });
+    renderDots();
   }
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
     const action = btn.dataset.action;
-    if (action.startsWith('goto:')) goto(action.slice(5));
-    else if (action === 'confirm') {
+    if (action === 'confirm') {
       const done = btn.classList.toggle('confirmed');
       btn.textContent = done ? 'Confirmed ✓' : 'Confirm';
       btn.classList.remove('breathe');
@@ -182,50 +278,49 @@
 
   document.getElementById('nav-prev').addEventListener('click', prev);
   document.getElementById('nav-next').addEventListener('click', next);
-  document.getElementById('nav-restart').addEventListener('click', () => goto(FLOW[0]));
+  document.getElementById('nav-restart').addEventListener('click', () => goStep(0));
 
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') next();
     else if (e.key === 'ArrowLeft') prev();
-    else if (e.key.toLowerCase() === 'r') goto(FLOW[0]);
+    else if (e.key.toLowerCase() === 'r') goStep(0);
   });
 
-  /* ────────────── Screen 1 · Nana asks for the booking ────────────── */
+  /* ─────────────────── Day tabs (sliding glider) ─────────────────── */
+
+  function positionGlider(tabs) {
+    const active = tabs.querySelector('.day-tab.active');
+    const glider = tabs.querySelector('.tab-glider');
+    if (!active || !glider) return;
+    glider.style.width = `${active.offsetWidth}px`;
+    glider.style.translate = `${active.offsetLeft}px 0`;
+  }
+  const allTabs = document.querySelectorAll('.day-tabs');
+  const positionAllGliders = () => allTabs.forEach(positionGlider);
+  document.fonts.ready.then(positionAllGliders);
+  window.addEventListener('resize', positionAllGliders);
+
+  allTabs.forEach(tabs => {
+    tabs.addEventListener('click', e => {
+      const tab = e.target.closest('.day-tab');
+      if (!tab || tab.classList.contains('active')) return;
+      tabs.querySelectorAll('.day-tab').forEach(b => b.classList.remove('active'));
+      tab.classList.add('active');
+      positionGlider(tabs);
+    });
+  });
+
+  /* ════════════════ Booking flow · screen sequences ════════════════ */
 
   const askScreen = screens.ask;
   const askPill = document.getElementById('ask-pill');
   const askAnswer = document.getElementById('ask-answer');
-  let askTimers = [];
+  const loadingReply = document.getElementById('loading-reply');
+  const resultsReply = document.getElementById('results-reply');
 
   sliceGradient(askAnswer);
-
-  function stopAskSequence() {
-    askTimers.forEach(clearTimeout);
-    askTimers = [];
-    askPill.dataset.state = 'idle';
-    askPill.classList.remove('pill-done');
-    askAnswer.querySelectorAll('.w').forEach(w => w.classList.remove('on'));
-  }
-
-  function startAskSequence() {
-    stopAskSequence();
-    const words = askAnswer.querySelectorAll('.w');
-    const t = (ms, fn) => askTimers.push(setTimeout(fn, ms));
-
-    t(700, () => { askPill.dataset.state = 'listening'; });     // mic opens
-    t(1500, () => {                                             // Nana speaks
-      words.forEach((w, i) => t(i * 175, () => w.classList.add('on')));
-    });
-    const spoken = 1500 + words.length * 175 + 1150;
-    t(spoken, () => pillDone(askPill));                         // done talking
-    t(spoken + 1100, () => goto('loading'));                    // companion gets to work
-  }
-
-  /* tap the screen to skip ahead (the pill itself is interactive) */
-  askScreen.addEventListener('click', e => {
-    if (e.target.closest('[data-action]') || e.target.closest('.voice-pill')) return;
-    goto('loading');
-  });
+  wrapWords(loadingReply);
+  wrapWords(resultsReply);
 
   /* pills are a live mic demo: tap to talk, tap again — done */
   document.querySelectorAll('.voice-pill').forEach(pill => {
@@ -238,49 +333,130 @@
     });
   });
 
-  /* ────────────── Screen 2 · companion books, results load ────────────── */
+  /* tap to skip ahead (the pill itself stays interactive) */
+  askScreen.addEventListener('click', e => {
+    if (e.target.closest('[data-action]') || e.target.closest('.voice-pill')) return;
+    next();
+  });
+  screens.loading.addEventListener('click', next);
 
-  const loadingReply = document.getElementById('loading-reply');
-  let loadingTimers = [];
-  wrapWords(loadingReply);
+  /* ════════════════ Rework flow · screen sequences ════════════════ */
 
-  function stopLoadingSequence() {
-    loadingTimers.forEach(clearTimeout);
-    loadingTimers = [];
-    hush(loadingReply);
-  }
+  const sched = screens.sched;
+  const v2Answer = document.getElementById('v2-answer');
+  const v2Orb = document.getElementById('v2-orb');
+  const adText = document.getElementById('ad-text');
+  const addHeritage = document.getElementById('add-heritage');
 
-  function startLoadingSequence() {
-    stopLoadingSequence();
-    loadingTimers = speak(loadingReply, { interval: 130, delay: 480 });
-    // once the skeletons have done their work, the bookings resolve
-    loadingTimers.push(setTimeout(() => goto('results'), 3400));
-  }
+  sliceGradient(v2Answer, '#ffffff 0%, rgba(255,255,255,0.46) 100%');
+  sliceGradient(adText, '#ffffff 0%, rgba(255,255,255,0.42) 100%');
 
-  /* tap to skip ahead to the booked results */
-  screens.loading.addEventListener('click', () => goto('results'));
+  /* tap to skip the moments that would otherwise auto-advance */
+  [screens.voice2, screens.adding].forEach(s => s.addEventListener('click', next));
 
-  /* ────────────── Screen 3 · booked results ────────────── */
+  /* ─────────────────── Step definitions ─────────────────── */
 
-  const resultsReply = document.getElementById('results-reply');
-  wrapWords(resultsReply);
+  const STEP = {
+    /* ── booking ── */
+    ask() {
+      askPill.dataset.state = 'idle';
+      askPill.classList.remove('pill-done');
+      unlit(askAnswer);
+      const words = askAnswer.querySelectorAll('.w');
+      at(700, () => { askPill.dataset.state = 'listening'; });     // mic opens
+      at(1500, () => {                                             // Nana speaks
+        words.forEach((w, i) => at(i * 175, () => w.classList.add('on')));
+      });
+      const spoken = 1500 + words.length * 175 + 1150;
+      at(spoken, () => pillDone(askPill));
+      at(spoken + 1100, next);
+    },
+    loading() {
+      hush(loadingReply);
+      timers.push(...speak(loadingReply, { interval: 130, delay: 480 }));
+      at(3400, next);
+    },
+    results() {
+      // the reply was already spoken over the skeletons — keep it lit so the
+      // dissolve reads as the same sentence resolving, not a new one
+      resultsReply.querySelectorAll('.qw').forEach(w => w.classList.add('on'));
+    },
 
-  function startResults() {
-    // the reply was already spoken over the skeletons — keep it lit so the
-    // dissolve reads as the same sentence resolving, not a new one
-    resultsReply.querySelectorAll('.qw').forEach(w => w.classList.add('on'));
-  }
-  function stopResults() {
-    hush(resultsReply);
-    screens.results.querySelectorAll('.confirm-btn').forEach(b => {
-      b.classList.remove('confirmed');
-      b.textContent = 'Confirm';
-    });
-  }
+    /* ── rework ── */
+    'sched:stack'() {
+      sched.dataset.state = 'stack';
+      sched.dataset.card = 'artisans';
+      at(2600, next);                        // the day settles, then Nana picks a card
+    },
+    'sched:focus'() {
+      sched.dataset.state = 'focus';         // the 2 PM card lifts out of the stack
+      at(2200, next);
+    },
+    voice2() {
+      unlit(v2Answer);
+      v2Orb.classList.remove('orb-live');
+      const words = v2Answer.querySelectorAll('.w');
+      at(600, () => v2Orb.classList.add('orb-live'));              // mic opens
+      at(1200, () => {                                             // Nana asks
+        words.forEach((w, i) => at(i * 165, () => w.classList.add('on')));
+      });
+      const spoken = 1200 + words.length * 165 + 1000;
+      at(spoken, () => v2Orb.classList.remove('orb-live'));
+      at(spoken + 900, next);
+    },
+    'search:searching'({ changedScreen }) {
+      screens.search.dataset.state = 'searching';
+      if (changedScreen) { /* skeletons animate from CSS */ }
+      at(3200, next);
+    },
+    'search:results'() {
+      screens.search.dataset.state = 'results';
+      // the companion adds the first suggestion for you
+      at(2100, () => ghostTap(addHeritage));
+      at(2700, next);
+    },
+    adding() {
+      unlit(adText);
+      at(500, () => lit(adText));
+      at(3200, next);
+    },
+    'sched:focus2'() {
+      // the day comes back holding the new activity, still in the companion's hand
+      sched.dataset.card = 'hosn';
+      sched.dataset.state = 'focus';
+      at(2400, next);
+    },
+    'sched:stack2'() {
+      sched.dataset.state = 'stack';         // …and settles into the day
+      sched.dataset.card = 'hosn';
+    },
+  };
 
-  /* dev hook for demos/tests (e.g. jump to a screen from the console) */
-  window.__proto = { goto };
+  /* teardown per screen, so a step change never leaves a half-played state */
+  const EXIT = {
+    ask() {
+      askPill.dataset.state = 'idle';
+      askPill.classList.remove('pill-done');
+      unlit(askAnswer);
+    },
+    loading() { hush(loadingReply); },
+    results() {
+      hush(resultsReply);
+      screens.results.querySelectorAll('.confirm-btn').forEach(b => {
+        b.classList.remove('confirmed');
+        b.textContent = 'Confirm';
+      });
+    },
+    voice2() { unlit(v2Answer); v2Orb.classList.remove('orb-live'); },
+    adding() { unlit(adText); },
+    sched() {},
+    search() {},
+  };
 
+  /* dev hook for demos/tests (e.g. jump to a step from the console) */
+  window.__proto = { goStep, startFlow, FLOWS, step: () => FLOW[stepIndex] };
+
+  buildDots();
   renderDots();
-  startAskSequence();
+  STEP[FLOW[0]]({ changedScreen: true });
 })();

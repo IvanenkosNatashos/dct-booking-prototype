@@ -892,6 +892,399 @@ button.lg:active::after {
 }
 .orb-on-light { background: rgba(255, 255, 255, 0.6); }
 
+/* ═══════════════════ Rework flow · shared furniture ═══════════════════ */
+
+/* day tabs with the sliding white pill (positioned by app.js) */
+.day-tabs {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 138px;
+  width: 296px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.06);
+  display: flex;
+  gap: 4px;
+}
+.tab-glider {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  height: calc(100% - 8px);
+  width: 93.33px;
+  border-radius: 100px;
+  background: var(--white);
+  border: 1px solid var(--white);
+  box-sizing: border-box;
+  filter: drop-shadow(0 12px 9.5px rgba(41, 38, 47, 0.06));
+  translate: 4px 0;
+  transition: translate 0.6s cubic-bezier(0.3, 1.2, 0.4, 1), width 0.4s var(--ease-out);
+}
+.day-tab {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--grey-1);
+  cursor: pointer;
+  transition: color 0.6s ease, scale 0.2s var(--ease-out);
+}
+.day-tab.active { color: var(--black); }
+.day-tab:active { scale: 0.95; }
+
+/* the white haze the bottom bar sits in on light screens */
+.bottom-veil {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 173px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 55%);
+  mask-image: linear-gradient(to bottom, transparent, black 55%);
+  pointer-events: none;
+}
+
+/* ── the day's spot cards ── */
+
+.ev-card {
+  position: absolute;
+  left: 16px;
+  width: 358px;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--brand-royal);
+  padding: 16px;
+}
+.ev-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the dark wash under the caption, as in the Figma fill stack */
+.ev-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 15.9%, rgba(0, 0, 0, 0) 45.2%);
+}
+.ev-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(0, 0, 0, 0.27) 10.4%, rgba(0, 0, 0, 0) 81.7%);
+}
+.ev-meta { position: relative; }
+.ev-time { font-size: 20px; font-weight: 500; line-height: 1.1; color: var(--grey-3); }
+.ev-title {
+  margin-top: 8px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+/* ── Schedule screen: the stack, and the card lifted out of it ── */
+
+.sched-stack { position: absolute; inset: 0; }
+
+.ev-first { top: 239px; height: 262px; z-index: 1; }
+.ev-mid   { top: 293px; height: 287px; z-index: 2; }
+.ev-last  { top: 347px; height: 287px; z-index: 3; }
+
+/* every geometry change between the two states is a real move, never a
+   cross-fade — the card the companion is about to rework lifts out of
+   the stack and the rest of the day falls out of focus behind it */
+.ev-first, .ev-mid, .ev-last {
+  transition:
+    top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.7s ease,
+    opacity 0.7s ease,
+    box-shadow 0.7s ease;
+}
+
+.s-sched[data-state="focus"] .ev-first {
+  top: 231px;
+  filter: blur(6px);
+  opacity: 0.5;
+}
+.s-sched[data-state="focus"] .ev-last {
+  filter: blur(7px);
+  opacity: 0.5;
+}
+.s-sched[data-state="focus"] .ev-mid {
+  top: 303px;
+  rotate: -3deg;
+  z-index: 4;
+  box-shadow: 0 24px 48px rgba(41, 38, 47, 0.28);
+}
+
+/* which spot occupies the middle slot — swapped once it has been reworked */
+.mid-hosn, .mid-title-hosn { opacity: 0; }
+.mid-artisans, .mid-title-artisans { opacity: 1; }
+.mid-artisans, .mid-hosn, .mid-title-artisans, .mid-title-hosn {
+  transition: opacity 0.6s ease;
+}
+[data-card="hosn"] .mid-hosn, [data-card="hosn"] .mid-title-hosn { opacity: 1; }
+[data-card="hosn"] .mid-artisans, [data-card="hosn"] .mid-title-artisans { opacity: 0; }
+/* both titles share one slot, sized for the longer of the two, so the swap
+   is a cross-fade in place rather than a reflow */
+.ev-title-swap { position: relative; margin-top: 8px; height: 78px; }
+.ev-title-swap .ev-title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  margin-top: 0;
+}
+
+/* ── Voice input screen (frame 3) ── */
+
+.s-voice2, .s-adding { background: #16131a; }
+
+.v2-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.v2-backdrop .cover {
+  filter: blur(10px);
+  opacity: 0.6;
+  transform: scale(1.12);
+}
+.v2-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(181deg, rgba(0, 0, 0, 0) 25.4%, rgba(0, 0, 0, 0.79) 88.1%);
+}
+
+.v2-card {
+  top: 272px;
+  height: 287px;
+  rotate: -1deg;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+/* the scrim the companion's question is read against */
+.v2-fade {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 152px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #000);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 55%);
+  mask-image: linear-gradient(to bottom, transparent, black 55%);
+  pointer-events: none;
+}
+
+.v2-answer { left: 16px; top: 653px; width: 321px; }
+
+/* the companion orb, alone on the bar while it listens */
+.orb-solo {
+  left: 294px;
+  top: 730px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.orb-halo {
+  position: absolute;
+  left: -9px;
+  top: -10px;
+  width: 98px;
+  height: 100px;
+  border-radius: 666px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 22%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.6) 97%);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+/* while it listens, halo and dot matrix breathe on the same beat as the
+   voice pill in the booking flow */
+.orb.orb-live .orb-halo { opacity: 0.45; animation: glow-pulse 0.9s ease-in-out infinite; }
+.orb.orb-live img { animation: dots-talk 0.9s ease-in-out infinite; }
+
+/* ── Searching ⇄ Here you go (frames 4, 5) ── */
+
+/* the rest of the day, blurred back while the companion works */
+.se-ghost { opacity: 0.25; }
+.se-ghost-top { top: 78px; height: 262px; filter: blur(5.85px); }
+.se-ghost-bottom { top: 616px; height: 287px; filter: blur(7.55px); }
+
+.se-heading {
+  position: absolute;
+  left: 24px;
+  top: 288px;
+  width: 327px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.15;
+  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.42) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* the two headings trade places in the same spot, so the sentence reads
+   as one thought resolving rather than two separate screens */
+#se-hereyougo { opacity: 0; translate: 0 10px; transition: opacity 0.55s ease, translate 0.6s var(--ease-out); }
+#se-searching { transition: opacity 0.4s ease, translate 0.45s var(--ease-out); }
+[data-state="results"] #se-searching { opacity: 0; translate: 0 -10px; }
+[data-state="results"] #se-hereyougo { opacity: 1; translate: 0 0; }
+
+.se-row {
+  position: absolute;
+  left: 24px;
+  top: 348px;
+  display: flex;
+  gap: 6px;
+}
+.se-slot { position: relative; width: 194px; height: 251px; }
+
+/* skeleton and result occupy the same slot; the answer resolves in place */
+.sk-card, .sug-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 194px;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: opacity 0.6s ease, scale 0.7s var(--ease-out), filter 0.6s ease;
+}
+.sk-card { height: 246px; background: #2a2119; }
+.sk-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(24px);
+  transform: scale(1.3);
+}
+/* the blurred artwork alone reads too pale for white bones to show, so the
+   card keeps the Figma's warm dark wash under them */
+.sk-tint {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(150deg, rgba(38, 26, 14, 0.45), rgba(38, 26, 14, 0.1) 62%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.14));
+}
+.sk-loader { left: 50%; top: 96px; margin-left: -36px; width: 72px; height: 72px; }
+.sk-loader .sparkle-big { left: 22px; top: 24px; }
+.sk-loader .sparkle-tiny { left: 41px; top: 20px; }
+.arc-lag { animation-delay: -0.5s; }
+
+.sk-rows {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: 162px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.sk-rows .skel-bar { opacity: 0.32; animation-name: skel-shimmer-bright; }
+@keyframes skel-shimmer-bright {
+  0%, 100% { opacity: 0.32; }
+  50% { opacity: 0.18; }
+}
+.sk-rows .b-sm { width: 38px; height: 15px; }
+.sk-rows .b-full { width: 100%; height: 22px; }
+.sk-rows .b-mid { width: 130px; height: 22px; }
+
+.sug-card {
+  height: 251px;
+  background: var(--white);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  scale: 0.94;
+}
+[data-state="results"] .sk-card { opacity: 0; scale: 1.04; filter: blur(6px); }
+[data-state="results"] .sug-card { opacity: 1; scale: 1; }
+
+.sug-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.sug-text { margin-top: 24px; }
+.sug-time { font-size: 11px; font-weight: 500; line-height: 1.4; color: #8e96a2; opacity: 0.8; }
+.sug-title {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--black);
+}
+
+.add-btn {
+  margin-top: auto;
+  height: 52px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--white);
+  cursor: pointer;
+  transition: scale 0.2s var(--ease-out), background 0.3s ease;
+}
+.add-btn img { display: block; }
+.add-btn:active, .add-btn.pressed { scale: 0.92; background: var(--brand-royal); }
+
+/* ── Adding to your itinerary (frame 6) ── */
+
+.ad-card {
+  top: 256px;
+  height: 287px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+.ad-loader {
+  position: absolute;
+  left: 143px;
+  top: 586px;
+  width: 104px;
+  height: 104px;
+}
+.ad-loader .sparkle-big { left: 32px; top: 36px; }
+.ad-loader .sparkle-tiny { left: 60px; top: 30px; }
+.arc-tip.big { width: 9px; height: 9px; margin-top: -4.5px; }
+
+.ad-text {
+  left: 22px;
+  top: 710px;
+  width: 345px;
+  text-align: center;
+}
+
 /* ─────────────────────── Mobile (real device) ─────────────────────── */
 
 @media (max-width: 560px), (max-height: 700px) {
@@ -922,8 +1315,12 @@ button.lg:active::after {
   .sparkle,
   .skel-bar,
   .skel-orb,
+  .orb-halo,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }
   .qw, .voice-answer .w { transition-duration: 1ms; }
+  .ev-first, .ev-mid, .ev-last,
+  .sk-card, .sug-card, .tab-glider,
+  .se-heading { transition-duration: 1ms; }
   .touch-cursor { display: none; }
 }
