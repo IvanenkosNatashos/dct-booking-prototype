@@ -18,7 +18,7 @@
   const FLOWS = {
     booking: ['ask', 'loading', 'results'],
     rework: [
-      'sched:stack', 'sched:focus', 'voice2', 'search:searching',
+      'sched:stack', 'sched:focus', 'sched:voice', 'search:searching',
       'search:results', 'adding', 'sched:landing', 'sched:stack2',
     ],
   };
@@ -180,11 +180,20 @@
 
   /* screens whose entrance animations must replay when they are re-entered */
   function restartEntrance(el) {
+    el.classList.remove('entrance-held');
     el.querySelectorAll('[data-in]').forEach(n => {
       n.style.animation = 'none';
       void n.offsetWidth;                    // force reflow, then hand back to CSS
       n.style.animation = '';
     });
+  }
+
+  /* Drop the entrance animation so state rules regain control of opacity.
+     A forwards fill outranks normal declarations, so it has to be cleared
+     rather than out-specified — otherwise nothing can dim or fade these. */
+  function holdEntrance(el) {
+    el.classList.add('entrance-held');
+    el.querySelectorAll('[data-in]').forEach(n => { n.style.animation = 'none'; });
   }
 
   function goStep(i, { replay = true } = {}) {
@@ -219,9 +228,8 @@
       PRE[next] && PRE[next]();
       if (next === 'sched:landing') {
         // arriving mid-story: geometry is preset, furniture persists
-        screens.sched.classList.add('no-entrance');
+        holdEntrance(screens.sched);
       } else if (replay) {
-        screens[nextScreen].classList.remove('no-entrance');
         restartEntrance(screens[nextScreen]);
       }
       screens[nextScreen].classList.add('active');
@@ -389,7 +397,10 @@
   sliceGradient(adText, '#ffffff 0%, rgba(255,255,255,0.42) 100%');
 
   /* tap to skip the moments that would otherwise auto-advance */
-  [screens.voice2, screens.adding].forEach(s => s.addEventListener('click', next));
+  screens.adding.addEventListener('click', next);
+  sched.addEventListener('click', () => {
+    if (sched.dataset.state === 'voice') next();   // only the voice moment skips
+  });
 
   /* ─────────────────── Step definitions ─────────────────── */
 
@@ -426,16 +437,25 @@
         sched.dataset.state = 'stack';
         sched.dataset.card = 'artisans';
       });
-      // a restart earns its entrance back, and drops any landing leftovers
-      sched.classList.remove('no-entrance', 'settling');
+      // a restart earns its entrance back, and drops any leftovers
+      sched.classList.remove('settling');
       sched.querySelector('.ev-mid').classList.remove('pop-now');
+      unlit(v2Answer);
+      v2Orb.classList.remove('orb-live');
+      restartEntrance(sched);                // a restart rebuilds the day
       at(2600, next);                        // the day settles, then Nana picks a card
     },
     'sched:focus'() {
+      // drop the entrance's forwards-fill so the day can actually dim
+      holdEntrance(sched);
       sched.dataset.state = 'focus';         // the 2 PM card lifts out of the stack
       at(2200, next);
     },
-    voice2() {
+    'sched:voice'() {
+      // no screen swap: the backdrop fades up and the card slides to its
+      // speaking position while the avatar, tabs and card stay put
+      holdEntrance(sched);
+      sched.dataset.state = 'voice';
       unlit(v2Answer);
       v2Orb.classList.remove('orb-live');
       const words = v2Answer.querySelectorAll('.w');
@@ -465,6 +485,7 @@
     },
     'sched:landing'() {
       // the day reassembles around the card, which never moved
+      holdEntrance(sched);
       sched.dataset.card = 'hosn';
       sched.dataset.state = 'landing';
       const mid = sched.querySelector('.ev-mid');
@@ -512,11 +533,12 @@
         b.textContent = 'Confirm';
       });
     },
-    voice2() { unlit(v2Answer); v2Orb.classList.remove('orb-live'); },
     adding() { unlit(adText); },
     sched() {
-      sched.classList.remove('no-entrance', 'settling');
+      sched.classList.remove('settling');
       sched.querySelector('.ev-mid').classList.remove('pop-now');
+      unlit(v2Answer);
+      v2Orb.classList.remove('orb-live');
     },
     search() {},
   };

@@ -188,6 +188,14 @@
              stack; `data-card` swaps which spot sits in that middle slot, so the
              day comes back from the companion holding the newly-added activity. -->
         <section class="screen s-sched theme-light" data-screen="sched" data-state="stack" data-card="artisans">
+          <!-- the companion's backdrop, faded up over the day when she takes
+               the floor: the only thing that changes between the focus and
+               voice moments, so the chrome above it never swaps -->
+          <div class="v2-backdrop sched-voice-bg">
+            <img class="cover" src="assets/ev-artisans.jpg" alt="">
+            <div class="v2-grad"></div>
+          </div>
+
           <span class="host-orb" data-in style="--i:1">
             <img src="assets/avatar-nana.jpg" alt="Your companion host">
           </span>
@@ -244,44 +252,17 @@
               <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
             </button>
           </div>
-          <div class="home-indicator hi-dark"></div>
-        </section>
 
-        <!-- ═══════ Rework flow · Voice input (frame 3) ═══════ -->
-        <section class="screen s-voice2" data-screen="voice2">
-          <div class="v2-backdrop">
-            <img class="cover" src="assets/ev-artisans.jpg" alt="">
-            <div class="v2-grad"></div>
-          </div>
-
-          <span class="host-orb" data-in style="--i:1">
-            <img src="assets/avatar-nana.jpg" alt="Your companion host">
-          </span>
-
-          <nav class="day-tabs lg" data-tabs="day" aria-label="Trip days" data-in style="--i:0">
-            <span class="tab-glider" aria-hidden="true"></span>
-            <button class="day-tab active" data-day="1">Day 1</button>
-            <button class="day-tab" data-day="2">Day 2</button>
-            <button class="day-tab" data-day="3">Day 3</button>
-          </nav>
-
-          <article class="ev-card v2-card" data-in style="--i:2">
-            <img class="ev-photo kenburns" src="assets/ev-artisans.jpg" alt="House of Artisans">
-            <div class="ev-scrim"></div>
-            <div class="ev-meta">
-              <p class="ev-time">02:00 PM</p>
-              <p class="ev-title">House of Artisans</p>
-            </div>
-          </article>
-
+          <!-- the voice moment (frame 3) lives on this same screen, so the
+               avatar, day tabs and spot card simply stay where they are -->
           <div class="v2-fade"></div>
           <p class="voice-answer v2-answer" id="v2-answer" aria-live="polite">What we can do instead of going there?</p>
-
           <button class="orb orb-solo lg lg-sm" id="v2-orb" data-action="none" aria-label="Talk to your companion">
             <span class="orb-halo" aria-hidden="true"></span>
             <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
           </button>
-          <div class="home-indicator hi-light"></div>
+
+          <div class="home-indicator hi-dark"></div>
         </section>
 
         <!-- ═══════ Rework flow · Searching ⇄ Here you go (frames 4, 5) ═══════

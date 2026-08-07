@@ -144,6 +144,13 @@ img { user-select: none; -webkit-user-drag: none; }
   to { opacity: 1; translate: 0 0; }
 }
 
+/* Entrance held. A forwards-filling animation outranks normal declarations,
+   so while `rise-in` is applied no state rule can dim or fade these elements.
+   app.js clears the animation inline (the only way to beat an animation
+   without a specificity war) and adds this class; the low specificity here
+   is deliberate, so every state rule below still wins on opacity. */
+.entrance-held [data-in] { opacity: 1; }
+
 /* slow cinematic drift inside photos (Fantasy-style ken burns) */
 .kenburns {
   animation: kenburns 22s ease-in-out infinite alternate;
@@ -1088,9 +1095,52 @@ button.lg:active::after {
   transition-delay: 0s;              /* lifting above the stack is immediate */
 }
 
-/* a screen arriving mid-story skips its entrance so its furniture simply
-   persists through the dissolve */
-.screen.active.no-entrance [data-in] { animation: none; opacity: 1; }
+/* ── Voice moment, played on the schedule screen (frames 2 → 3) ──
+   Nothing swaps: the backdrop fades up, the day recedes into it, and the
+   spot card slides to its speaking position — the avatar, day tabs and the
+   card itself are the same elements throughout, so none of them blink. */
+.sched-voice-bg {
+  z-index: 0;
+  background: #16131a;
+  opacity: 0;
+  transition: opacity 0.75s var(--ease-out);
+}
+.s-sched[data-state="voice"] .sched-voice-bg { opacity: 1; }
+
+/* the rest of the day dissolves into the backdrop */
+.s-sched[data-state="voice"] .ev-first,
+.s-sched[data-state="voice"] .ev-last { opacity: 0; }
+
+/* the spot card stays crisp and simply moves to where it is spoken about */
+.s-sched[data-state="voice"] .ev-mid {
+  top: 272px;
+  rotate: var(--tilt-voice);
+  z-index: 4;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+/* the light chrome gives way to the companion's dark scrim */
+.s-sched .trip-bar,
+.s-sched .bottom-veil { transition: opacity 0.6s ease; }
+.s-sched[data-state="voice"] .trip-bar,
+.s-sched[data-state="voice"] .bottom-veil { opacity: 0; pointer-events: none; }
+.s-sched[data-state="voice"] .home-indicator { background: rgba(255, 255, 255, 0.8); }
+
+/* the voice furniture, revealed only for that moment */
+.s-sched .v2-fade,
+.s-sched .v2-answer,
+.s-sched .orb-solo {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.s-sched[data-state="voice"] .v2-fade,
+.s-sched[data-state="voice"] .v2-answer,
+.s-sched[data-state="voice"] .orb-solo { opacity: 1; }
+.s-sched[data-state="voice"] .orb-solo { pointer-events: auto; }
+.s-sched .v2-fade { z-index: 6; }
+.s-sched .v2-answer { z-index: 7; }
+.s-sched .orb-solo { z-index: 7; }
 
 /* returning to the stack, the day closes briskly: the neighbours are solid
    again before the z-order flips, so the 4 PM card covers the new card
@@ -1149,7 +1199,7 @@ button.lg:active::after {
 
 /* ── Voice input screen (frame 3) ── */
 
-.s-voice2, .s-adding { background: #16131a; }
+.s-adding { background: #16131a; }
 
 .v2-backdrop {
   position: absolute;
@@ -1165,13 +1215,6 @@ button.lg:active::after {
   position: absolute;
   inset: 0;
   background: linear-gradient(181deg, rgba(0, 0, 0, 0) 25.4%, rgba(0, 0, 0, 0.79) 88.1%);
-}
-
-.v2-card {
-  top: 272px;
-  height: 287px;
-  rotate: var(--tilt-voice);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
 }
 
 /* the scrim the companion's question is read against */
