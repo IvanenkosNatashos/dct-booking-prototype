@@ -425,12 +425,6 @@ button.lg:active::after {
   object-fit: cover;
 }
 
-.media-fade-bottom {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 45.5%, rgba(0, 0, 0, 0.6) 100%);
-}
-
 .circle-btn {
   position: absolute;
   width: 64px;
@@ -463,18 +457,43 @@ button.lg:active::after {
 
 /* ─────────────────── Screen 1 · Voice ask (dark) ─────────────────── */
 
-.voice-backdrop {
+/* Teal field (Nana 11): a deep gradient with one blurred cyan bloom and a
+   low-opacity wave, both drifting slowly so the field stays alive under the
+   conversation the way the photo backdrop used to. */
+.teal-bg {
   position: absolute;
   inset: 0;
-  background: var(--brand-royal);
   overflow: hidden;
+  background: linear-gradient(to bottom, #00605f 0%, #000 100%);
 }
-.dark-veil {
+.teal-glow,
+.teal-wave {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  -webkit-backdrop-filter: blur(40px);
-  backdrop-filter: blur(40px);
+  max-width: none;
+  display: block;
+  pointer-events: none;
+}
+.teal-glow {
+  left: -83px;
+  top: 317px;
+  width: 1060px;
+  height: 1060px;
+  animation: teal-bloom 30s ease-in-out infinite alternate;
+}
+.teal-wave {
+  left: -960px;
+  top: 218px;
+  width: 1427px;
+  height: 559px;
+  animation: teal-drift 38s ease-in-out infinite alternate;
+}
+@keyframes teal-bloom {
+  from { translate: 0 0; scale: 1; }
+  to { translate: -46px -38px; scale: 1.12; }
+}
+@keyframes teal-drift {
+  from { translate: 0 0; }
+  to { translate: 38px -22px; }
 }
 
 /* the trip the companion is being asked about, pinned top-right */
@@ -1448,6 +1467,8 @@ button.lg:active::after {
   .skel-bar,
   .skel-orb,
   .orb-halo,
+  .teal-glow,
+  .teal-wave,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }
   .hero-card.enter, .pop-now { animation-duration: 1ms; }
