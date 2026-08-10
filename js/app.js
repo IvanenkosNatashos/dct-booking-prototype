@@ -409,9 +409,13 @@
     ask() {
       askPill.dataset.state = 'idle';
       askPill.classList.remove('pill-done');
+      askScreen.classList.remove('lit');
       unlit(askAnswer);
       const words = askAnswer.querySelectorAll('.w');
-      at(700, () => { askPill.dataset.state = 'listening'; });     // mic opens
+      at(700, () => {                                              // mic opens…
+        askPill.dataset.state = 'listening';
+        askScreen.classList.add('lit');   // …and the bloom rises to the top
+      });
       at(1500, () => {                                             // Nana speaks
         words.forEach((w, i) => at(i * 175, () => w.classList.add('on')));
       });
@@ -523,6 +527,7 @@
     ask() {
       askPill.dataset.state = 'idle';
       askPill.classList.remove('pill-done');
+      askScreen.classList.remove('lit');
       unlit(askAnswer);
     },
     loading() { hush(loadingReply); },
