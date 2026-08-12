@@ -468,6 +468,7 @@ button.lg:active::after {
 }
 .teal-glow-wrap,
 .teal-glow,
+.teal-wave-wrap,
 .teal-wave {
   position: absolute;
   max-width: none;
@@ -496,12 +497,27 @@ button.lg:active::after {
   translate: 0 -758px;
   scale: 0.905;
 }
-.teal-wave {
+/* like the bloom, the wave splits its motion across two elements: the
+   wrapper plays the one-shot settle-in when the screen opens, the img
+   inside carries the endless ambient drift — same property, no fight */
+.teal-wave-wrap {
   left: -1848px;
   top: -21px;
   width: 2466px;
   height: 966px;
+}
+.s-ask.active .teal-wave-wrap {
+  animation: wave-enter 3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.teal-wave {
+  inset: 0;
+  width: 100%;
+  height: 100%;
   animation: teal-drift 38s ease-in-out infinite alternate;
+}
+@keyframes wave-enter {
+  from { translate: 74px 30px; }
+  to { translate: 0 0; }
 }
 @keyframes teal-breathe {
   from { scale: 1; opacity: 1; }
@@ -1485,6 +1501,7 @@ button.lg:active::after {
   .orb-halo,
   .teal-glow,
   .teal-wave,
+  .s-ask.active .teal-wave-wrap,
   .breathe { animation: none; }
   .teal-glow-wrap { transition-duration: 1ms; }
   [data-in] { animation-duration: 1ms; }

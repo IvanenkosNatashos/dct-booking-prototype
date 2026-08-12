@@ -411,6 +411,12 @@
       askPill.classList.remove('pill-done');
       askScreen.classList.remove('lit');
       unlit(askAnswer);
+      // replay the wave's settle-in (a restart keeps the screen active,
+      // so the CSS animation alone would not rerun)
+      const wave = askScreen.querySelector('.teal-wave-wrap');
+      wave.style.animation = 'none';
+      void wave.offsetWidth;
+      wave.style.animation = '';
       const words = askAnswer.querySelectorAll('.w');
       at(700, () => {                                              // mic opens…
         askPill.dataset.state = 'listening';
