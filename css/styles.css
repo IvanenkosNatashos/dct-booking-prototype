@@ -497,10 +497,10 @@ button.lg:active::after {
   scale: 0.905;
 }
 .teal-wave {
-  left: -960px;
-  top: 218px;
-  width: 1427px;
-  height: 559px;
+  left: -1848px;
+  top: -21px;
+  width: 2466px;
+  height: 966px;
   animation: teal-drift 38s ease-in-out infinite alternate;
 }
 @keyframes teal-breathe {
