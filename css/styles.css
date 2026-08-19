@@ -1709,12 +1709,16 @@ button.lg:active::after {
 .home-logo { width: 102.897px; height: 26.4px; }
 .home-controls { width: 75px; height: 30px; }
 
+/* Figma exported this node against its backdrop, so the PNG is fully opaque
+   #e9e9e9 rather than a cut-out. Its 13px of glow bleed above the bar was
+   therefore painting a hard band across the page; the file is cropped to the
+   bar itself, so nothing sits above it. */
 .home-nav {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 390px;
-  height: 130px;
+  height: 117px;
   display: block;
   pointer-events: none;
 }
