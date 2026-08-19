@@ -262,11 +262,6 @@ button.lg:active::after {
   .trip-bar.lg { background: rgba(255, 255, 255, 0.92); }
   .dates-card.lg { background: rgba(255, 255, 255, 0.82); }
   .banner-card.lg { background: rgba(255, 255, 255, 0.95); }
-  /* the blur ramp has nothing to fall back to, so the tint carries the scrim */
-  .home-botfade i { -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .home-botfade span {
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #fff 58%);
-  }
 }
 
 /* ─────────────────────────── Stage chrome ─────────────────────────── */
@@ -1714,43 +1709,6 @@ button.lg:active::after {
 .home-logo { width: 102.897px; height: 26.4px; }
 .home-controls { width: 75px; height: 30px; }
 
-/* The scrim behind the tab bar is frost, not paint: translucent, so the page
-   keeps showing through it softly out of focus.
-
-   It is built as a stack of bands rather than one blurred layer because
-   `backdrop-filter` ignores `mask-image` — Chromium blurs the element's whole
-   rectangle, which put a hard blur seam across the page. Each band is shorter
-   and blurrier than the one below it, so the blur ramps up toward the bar with
-   no single step large enough to see. Figma's background blur is modulated by
-   the layer's own alpha, so this also matches the design more closely than a
-   uniform blur would. */
-.home-botfade {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 174px;
-  pointer-events: none;
-}
-.home-botfade i {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: var(--h);
-  -webkit-backdrop-filter: blur(var(--b));
-  backdrop-filter: blur(var(--b));
-}
-.home-botfade span {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.42) 52%,
-    rgba(255, 255, 255, 0.72) 100%);
-}
-/* the export is 130 tall for a 117 frame — the extra 13px is the sparkle's
-   glow bleeding above it, so it aligns from the bottom, not the top */
 .home-nav {
   position: absolute;
   left: 0;
@@ -1946,11 +1904,17 @@ button.lg:active::after {
 
 /* ── opening a stop: the day recedes, the card grows ── */
 
-/* the rest of the day blurs back, as in the second frame */
-.s-plan[data-state="open"] .tl-row:not(:last-child) .tl-card { filter: blur(10px); opacity: 0.9; }
+/* The day is pushed back on the cards themselves — as the design does, washing
+   each card rather than the screen. Fading them toward the page also avoids
+   stacking two backdrop-filters: those apply at full strength regardless of a
+   layer's alpha (Figma modulates by it), so where a veil's tint thinned the
+   blurred artwork bled through and their edges left a hard seam under the card. */
+.s-plan[data-state="open"] .tl-row:not(:last-child) .tl-card { filter: blur(10px); opacity: 0.3; }
 .s-plan[data-state="open"] .tl-row:last-child .tl-card { filter: blur(2px); opacity: 0; }
 .s-plan[data-state="open"] .plan-scroll { pointer-events: none; }
 
+/* the veils are now pure tint, and each fades to nothing at its inner edge so
+   the two meet continuously instead of stepping */
 .plan-veil {
   position: absolute;
   left: 0;
@@ -1958,13 +1922,12 @@ button.lg:active::after {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.7s ease;
-  -webkit-backdrop-filter: blur(40px);
-  backdrop-filter: blur(40px);
 }
 .plan-veil-top {
   top: 0;
   height: 524px;
-  background: linear-gradient(to bottom, #fff 0%, rgba(255, 255, 255, 0.24) 100%);
+  background: linear-gradient(to bottom,
+    #fff 0%, rgba(255, 255, 255, 0.62) 52%, rgba(255, 255, 255, 0) 100%);
 }
 .plan-veil-bottom {
   bottom: -30px;
