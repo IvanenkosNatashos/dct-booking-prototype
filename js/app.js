@@ -21,6 +21,7 @@
       'sched:stack', 'sched:focus', 'sched:voice', 'search:searching',
       'search:results', 'adding', 'sched:landing', 'sched:stack2',
     ],
+    home: ['home:top', 'home:banner'],
   };
 
   const screens = {};
@@ -402,6 +403,42 @@
     if (sched.dataset.state === 'voice') next();   // only the voice moment skips
   });
 
+  /* ════════════ Taking-shape flow · homepage scroll ════════════ */
+
+  const homeScroll = document.getElementById('home-scroll');
+  const shapeBanner = document.getElementById('shape-banner');
+  let glideRaf = null;
+
+  /* a slow cinematic glide the browser's own smooth scroll is too hasty for */
+  function glideTo(el, to, ms) {
+    stopGlide();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.scrollTop = to;
+      return;
+    }
+    const from = el.scrollTop;
+    const t0 = performance.now();
+    const easeInOut = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    (function tick(now) {
+      const p = Math.min(1, (now - t0) / ms);
+      el.scrollTop = from + (to - from) * easeInOut(p);
+      if (p < 1) glideRaf = requestAnimationFrame(tick);
+      else glideRaf = null;
+    })(t0);
+  }
+  function stopGlide() {
+    if (glideRaf) cancelAnimationFrame(glideRaf);
+    glideRaf = null;
+  }
+
+  /* where the page rests: the banner's underside 16px above the tab bar */
+  const bannerRest = () =>
+    shapeBanner.offsetTop + shapeBanner.offsetHeight - (844 - 117 - 16);
+
+  /* a hand on the page takes over from the scripted glide */
+  homeScroll.addEventListener('pointerdown', stopGlide);
+  homeScroll.addEventListener('wheel', stopGlide, { passive: true });
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -516,6 +553,17 @@
       sched.dataset.card = 'hosn';
       at(1000, () => sched.classList.remove('settling'));
     },
+
+    /* ── taking shape ── */
+    'home:top'() {
+      stopGlide();
+      homeScroll.scrollTop = 0;               // a restart opens at the top
+      restartEntrance(screens.home);          // …and the page emerges again
+      at(3200, next);                          // linger, then wander down
+    },
+    'home:banner'() {
+      glideTo(homeScroll, bannerRest(), 1800); // …to rest on the banner
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -552,6 +600,7 @@
       v2Orb.classList.remove('orb-live');
     },
     search() {},
+    home() { stopGlide(); },
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */

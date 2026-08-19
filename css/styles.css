@@ -33,6 +33,7 @@
 :root {
   /* brand */
   --brand-royal: #4c0c47;
+  --brand-palm: #00605f;
   --black: #000000;
   --white: #ffffff;
   --grey-1: #565a5c;
@@ -1466,6 +1467,267 @@ button.lg:active::after {
   top: 710px;
   width: 345px;
   text-align: center;
+}
+
+/* ═══════════ Taking-shape flow · Experience Abu Dhabi homepage ═══════════ */
+
+/* the warm brand ornament, pinned behind the scrolling page */
+.home-bg {
+  position: absolute;
+  left: -1382px;
+  top: -1305px;
+  width: 2104px;
+  height: 2219px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.home-swirl {
+  width: 2199px;
+  height: 863px;
+  max-width: none;
+  rotate: 48.5deg;
+}
+
+/* ── the scrolling page ── */
+
+.home-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 124px 16px 140px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  cursor: grab;
+}
+.home-scroll.dragging { cursor: grabbing; }
+.home-scroll::-webkit-scrollbar { display: none; }
+
+.home-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 358px;
+}
+
+.home-hero { display: flex; flex-direction: column; gap: 8px; }
+.home-title {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--black);
+  width: 276px;
+}
+.home-sub { font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--grey-1); }
+
+/* saved places — the third card runs past the phone edge, as in the frame */
+.saved-row {
+  display: flex;
+  gap: 9px;
+  height: 209px;
+  margin-top: 12px;                /* 12 + the column's 12 = the frame's 24 */
+}
+.saved-card {
+  position: relative;
+  flex: 0 0 174.5px;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.saved-veil { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.2); }
+.saved-meta { position: relative; }
+.saved-name { font-size: 20px; font-weight: 500; line-height: 1.2; color: var(--white); }
+.saved-note { margin-top: 4px; font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--white); }
+
+/* during your dates */
+.dates-card {
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px;
+}
+.dates-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 1.1;
+}
+.dates-title { font-size: 20px; font-weight: 500; color: var(--black); }
+.dates-range { font-size: 14px; font-weight: 500; color: var(--grey-1); }
+.dates-rows {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.date-row { display: flex; align-items: center; gap: 14px; width: 326px; }
+.date-chip {
+  flex: 0 0 47px;
+  height: 47px;
+  border-radius: 12px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--grey-1);
+}
+.date-chip b { font-size: 12px; font-weight: 700; color: var(--black); }
+.date-name { font-size: 16px; font-weight: 500; line-height: 1.2; color: var(--black); }
+.date-note { margin-top: 4px; font-size: 12px; font-weight: 500; line-height: 1.2; color: var(--grey-2); }
+
+/* the banner the page comes to rest on */
+.shape-banner {
+  position: relative;
+  width: 100%;
+  height: 333px;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--brand-royal);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.banner-photo {
+  position: absolute;
+  left: 0;
+  top: -46.24%;
+  width: 100%;
+  height: 161.26%;
+  max-width: none;
+  object-fit: cover;
+}
+.banner-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 45.5%, rgba(0, 0, 0, 0.73) 100%);
+}
+.banner-card {
+  position: relative;
+  width: 100%;
+  height: 168px;
+  border-radius: var(--r-card);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 17px 18.7px -12px rgba(41, 38, 47, 0.06);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.banner-text {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--black);
+  width: 322px;
+}
+.ask-btn {
+  width: 100%;
+  height: 56px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--brand-palm);
+  color: var(--white);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  filter: drop-shadow(0 10px 14.1px rgba(255, 255, 255, 0.32));
+  transition: transform 0.18s var(--ease-out);
+}
+.ask-btn:active { transform: scale(0.97); }
+
+/* ── fixed chrome over the scroll ── */
+
+.home-topfade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 174px;
+  background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0));
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent);
+  mask-image: linear-gradient(to bottom, black 30%, transparent);
+  pointer-events: none;
+}
+.home-header {
+  position: absolute;
+  left: 24px;
+  top: 44px;
+  width: 334px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+  pointer-events: none;
+}
+.home-logo, .home-controls { display: block; }
+
+.home-botfade {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 174px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 55%);
+  mask-image: linear-gradient(to bottom, transparent, black 55%);
+  pointer-events: none;
+}
+.home-nav {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 117px;
+  border-radius: var(--r-device);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 -6px 18.7px rgba(41, 38, 47, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 47px;
+}
+.home-nav > img { display: block; }
+.nav-spark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.18s var(--ease-out);
+}
+.nav-spark:hover { transform: scale(1.05); }
+.nav-spark:active { transform: scale(0.94); }
+/* the svg carries its own drop shadow, which bleeds past the button box */
+.nav-spark img {
+  position: absolute;
+  left: -6.7px;
+  top: 0;
+  width: 85.4px;
+  height: 95.7px;
+  max-width: none;
 }
 
 /* ─────────────────────── Mobile (real device) ─────────────────────── */

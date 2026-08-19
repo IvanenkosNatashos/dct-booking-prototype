@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Al Hosn Trip · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="css/styles.css?v=5">
+  <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
   <!-- Liquid Glass lens filters: organic displacement of the backdrop,
@@ -33,6 +33,7 @@
         <span class="flow-glider" aria-hidden="true"></span>
         <button class="flow-tab active" data-flow="booking">Nana · Booking the trip</button>
         <button class="flow-tab" data-flow="rework">Nana · Reworking the day</button>
+        <button class="flow-tab" data-flow="home">Wei · Taking shape</button>
       </nav>
     </header>
 
@@ -412,6 +413,107 @@
           <div class="home-indicator hi-light"></div>
         </section>
 
+        <!-- ═══════ Taking-shape flow · Experience Abu Dhabi homepage (29:507 → 29:374) ═══════
+             One scrollable page: the content emerges softly, then the page
+             glides down and rests on the "Shape into itinerary" banner. -->
+        <section class="screen s-home theme-light" data-screen="home">
+          <div class="home-bg" aria-hidden="true">
+            <img class="home-swirl" src="assets/ead-pattern.svg" alt="">
+          </div>
+
+          <div class="home-scroll" id="home-scroll">
+            <div class="home-col">
+              <div class="home-hero" data-in style="--i:0">
+                <h1 class="home-title">Your Abu Dhabi is taking shape!</h1>
+                <p class="home-sub">3 place saved - shared with Wei</p>
+              </div>
+
+              <div class="saved-row">
+                <article class="saved-card" data-in style="--i:1">
+                  <img class="cover kenburns" src="assets/saved-art.jpg" alt="Family Art Trail">
+                  <div class="saved-veil"></div>
+                  <div class="saved-meta">
+                    <p class="saved-name">Family Art Trail</p>
+                    <p class="saved-note">2hrs • ages 6-12</p>
+                  </div>
+                </article>
+                <article class="saved-card" data-in style="--i:2">
+                  <img class="cover kenburns" src="assets/saved-hosn.jpg" alt="Qasr Al Hosn">
+                  <div class="saved-veil"></div>
+                  <div class="saved-meta">
+                    <p class="saved-name">Qasr Al Hosn</p>
+                    <p class="saved-note">Oldest building in the city</p>
+                  </div>
+                </article>
+                <article class="saved-card" data-in style="--i:3">
+                  <img class="cover kenburns" src="assets/saved-market.jpg" alt="Mina Zayed Market">
+                  <div class="saved-veil"></div>
+                  <div class="saved-meta">
+                    <p class="saved-name">Mina Zayed Market</p>
+                    <p class="saved-note">Local market</p>
+                  </div>
+                </article>
+              </div>
+
+              <div class="dates-card" data-in style="--i:4">
+                <div class="dates-head">
+                  <p class="dates-title">During you dates</p>
+                  <p class="dates-range">14-20 Nov</p>
+                </div>
+                <div class="dates-rows">
+                  <div class="date-row">
+                    <span class="date-chip"><b>14</b>NOV</span>
+                    <div class="date-text">
+                      <p class="date-name">Qasr Al Hosn evening tour</p>
+                      <p class="date-note">Explore secrets of old town</p>
+                    </div>
+                  </div>
+                  <div class="date-row">
+                    <span class="date-chip"><b>15</b>NOV</span>
+                    <div class="date-text">
+                      <p class="date-name">Cooking workshop</p>
+                      <p class="date-note">Cultural experience</p>
+                    </div>
+                  </div>
+                  <div class="date-row">
+                    <span class="date-chip"><b>15</b>NOV</span>
+                    <div class="date-text">
+                      <p class="date-name">Secrets of Qasr Al Hosn</p>
+                      <p class="date-note">Explore secrets of old town</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <article class="shape-banner" id="shape-banner" data-in style="--i:5">
+                <img class="banner-photo" src="assets/banner-shade.jpg" alt="">
+                <div class="banner-grad"></div>
+                <div class="banner-card">
+                  <p class="banner-text">Shape into itinerary everything that you’ve saved.</p>
+                  <button class="ask-btn" data-action="none">Ask Abu Dhabi</button>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="home-topfade"></div>
+          <header class="home-header" data-in style="--i:0">
+            <img class="home-logo" src="assets/ead-logo.svg" alt="Experience Abu Dhabi" width="103" height="40">
+            <img class="home-controls" src="assets/ead-header-btns.svg" alt="" width="75" height="30">
+          </header>
+
+          <div class="home-botfade"></div>
+          <nav class="home-nav lg" data-in style="--i:1" aria-label="App sections">
+            <img src="assets/icon-home.svg" alt="Home" width="22" height="22">
+            <img src="assets/icon-element3.svg" alt="Browse" width="20" height="20">
+            <button class="nav-spark" data-action="none" aria-label="Ask Abu Dhabi">
+              <img src="assets/nav-sparkle.svg" alt="">
+            </button>
+            <img src="assets/icon-briefcase.svg" alt="Trips" width="20" height="20">
+            <img src="assets/icon-profile.svg" alt="Profile" width="24" height="24">
+          </nav>
+        </section>
+
         <!-- ── the reworked card, shared across steps 6→8 ──
              One element riding above the screens from the adding moment until
              the schedule takes over, so the card can never blink or double
@@ -438,6 +540,6 @@
     </footer>
   </div>
 
-  <script src="js/app.js?v=5"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>
