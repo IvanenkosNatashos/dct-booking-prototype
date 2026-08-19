@@ -1836,12 +1836,26 @@ button.lg:active::after {
   position: relative;
   flex: 0 0 310px;
   height: 150px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 24px;
   overflow: hidden;
   background: #2b2b2b;
   padding: 16px;
   transition: filter 0.6s ease, opacity 0.6s ease, scale 0.5s var(--ease-out);
+}
+
+/* The stroke is drawn over the photo rather than as a border. A real border
+   sits on the element's own background — here a near-black fill, since the
+   photo is inset within it — so a translucent white would read as a dark
+   edge. Over the image it reads as the light rim the design asks for. */
+.tl-card::after,
+.detail-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 3;
 }
 .tl-photo {
   position: absolute;
@@ -1933,7 +1947,6 @@ button.lg:active::after {
   height: var(--dc-h, 150px);
   translate: var(--dc-x, 0) var(--dc-y, 0);
   rotate: var(--dc-r, 0deg);
-  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--dc-radius, 24px);
   overflow: hidden;
   background: #2b2b2b;
