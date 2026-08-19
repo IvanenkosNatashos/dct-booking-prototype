@@ -22,6 +22,7 @@
       'search:results', 'adding', 'sched:landing', 'sched:stack2',
     ],
     home: ['home:top', 'home:banner'],
+    plan: ['plan:top', 'plan:bottom', 'plan:open'],
   };
 
   const screens = {};
@@ -295,7 +296,6 @@
   flowTabs.addEventListener('click', e => {
     const tab = e.target.closest('.flow-tab');
     if (!tab || tab.classList.contains('active')) return;
-    markFlowTab(tab.dataset.flow);
     startFlow(tab.dataset.flow);
   });
   document.fonts.ready.then(positionFlowGlider);
@@ -315,6 +315,7 @@
 
   function startFlow(name) {
     rememberFlow(name);
+    markFlowTab(name);                         // any entry point keeps the tab in sync
     clearTimers();
     EXIT[stepScreen(FLOW[stepIndex])] && EXIT[stepScreen(FLOW[stepIndex])]();
     screens[stepScreen(FLOW[stepIndex])].classList.remove('active');
@@ -460,6 +461,63 @@
   homeScroll.addEventListener('pointerdown', stopGlide);
   homeScroll.addEventListener('wheel', stopGlide, { passive: true });
 
+  /* ════════════ Opening-a-stop flow · plan scroll + card expand ════════════ */
+
+  const planScreen = screens.plan;
+  const planScroll = document.getElementById('plan-scroll');
+  const qasrCard = document.getElementById('qasr-card');
+  const detailCard = document.getElementById('detail-card');
+
+  planScroll.addEventListener('pointerdown', stopGlide);
+  planScroll.addEventListener('wheel', stopGlide, { passive: true });
+
+  /* the detail card's resting geometry, straight off the second frame */
+  const DETAIL_REST = { x: 18.1, y: 235.7, w: 354.2, h: 242.8, r: -1.21, radius: 27.4, pad: 18.3 };
+
+  /* rect of an element in the phone's own 390-wide coordinate space */
+  function phoneRect(el) {
+    const pr = phoneScreens.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const s = pr.width / 390;
+    return { x: (r.left - pr.left) / s, y: (r.top - pr.top) / s,
+             w: r.width / s, h: r.height / s };
+  }
+
+  /* Plant the detail card exactly over the card that was tapped, then release
+     it to its resting geometry — one element travelling, so the open reads as
+     the card itself growing rather than a panel arriving. */
+  function openStop() {
+    const from = phoneRect(qasrCard);
+    detailCard.classList.add('placing');
+    const set = g => {
+      detailCard.style.setProperty('--dc-x', `${g.x}px`);
+      detailCard.style.setProperty('--dc-y', `${g.y}px`);
+      detailCard.style.setProperty('--dc-w', `${g.w}px`);
+      detailCard.style.setProperty('--dc-h', `${g.h}px`);
+      detailCard.style.setProperty('--dc-r', `${g.r || 0}deg`);
+      detailCard.style.setProperty('--dc-radius', `${g.radius || 24}px`);
+      detailCard.style.setProperty('--dc-pad', `${g.pad || 16}px`);
+      detailCard.style.setProperty('--dc-title', `${g.title || 24}px`);
+      detailCard.style.setProperty('--dc-note', `${g.note || 12}px`);
+    };
+    set(from);
+    detailCard.classList.add('on');
+    void detailCard.offsetWidth;                 // plant before animating
+    detailCard.classList.remove('placing');
+    planScreen.dataset.state = 'open';           // scrims rise, the day blurs
+    set({ ...DETAIL_REST, title: 27.4, note: 13.7 });
+  }
+
+  function closeStop() {
+    detailCard.classList.remove('on', 'placing');
+    planScreen.dataset.state = 'bottom';
+  }
+
+  /* tapping the stop opens it, as the scripted tap does */
+  qasrCard.addEventListener('click', () => {
+    if (planScreen.dataset.state !== 'open') goStep(FLOW.indexOf('plan:open'));
+  });
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -585,6 +643,27 @@
     'home:banner'() {
       glideTo(homeScroll, bannerRest(), 1800); // …to rest on the banner
     },
+
+    /* ── opening a stop ── */
+    'plan:top'() {
+      stopGlide();
+      closeStop();
+      planScreen.dataset.state = 'top';
+      planScroll.scrollTop = 0;
+      restartEntrance(planScreen);
+      at(2800, next);                          // the day settles, then scrolls
+    },
+    'plan:bottom'() {
+      planScreen.dataset.state = 'bottom';
+      // all the way down, so the evening stop sits clear of the tab bar
+      glideTo(planScroll, planScroll.scrollHeight - planScroll.clientHeight, 1700);
+      at(2600, () => ghostTap(qasrCard));      // Wei taps the evening tour
+      at(3000, next);
+    },
+    'plan:open'() {
+      stopGlide();
+      openStop();
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -622,6 +701,7 @@
     },
     search() {},
     home() { stopGlide(); },
+    plan() { stopGlide(); closeStop(); },
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */
@@ -629,7 +709,6 @@
 
   const resume = rememberedFlow();
   if (resume && resume !== activeFlow) {
-    markFlowTab(resume);
     startFlow(resume);                       // reopen the tab last reviewed
   } else {
     buildDots();

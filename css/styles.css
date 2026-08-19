@@ -1726,6 +1726,331 @@ button.lg:active::after {
   pointer-events: none;
 }
 
+/* ═══════════ Opening-a-stop flow · the day plan and its detail card ═══════════ */
+
+.plan-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 150px 16px 150px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  cursor: grab;
+}
+.plan-scroll.dragging { cursor: grabbing; }
+.plan-scroll::-webkit-scrollbar { display: none; }
+.plan-col { display: flex; flex-direction: column; align-items: flex-start; width: 358px; }
+
+.plan-title { font-size: 32px; font-weight: 500; line-height: 1.2; color: var(--black); white-space: nowrap; }
+.plan-sub { margin-top: 8px; font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--grey-1); }
+
+/* day selector — four equal tabs behind a sliding pill */
+.plan-days {
+  position: relative;
+  margin-top: 24px;
+  width: 358px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.06);
+  display: flex;
+  gap: 4px;
+}
+.plan-glider {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: calc((100% - 8px - 12px) / 4);
+  height: calc(100% - 8px);
+  border-radius: 100px;
+  background: var(--white);
+  border: 1px solid var(--white);
+  box-sizing: border-box;
+  filter: drop-shadow(0 12px 9.5px rgba(41, 38, 47, 0.06));
+}
+.plan-day {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--grey-1);
+  cursor: pointer;
+}
+.plan-day.active { color: var(--black); }
+
+/* ── the timeline ── */
+
+.timeline {
+  margin-top: 24px;
+  width: 361px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tl-row { display: flex; gap: 10px; align-items: flex-start; }
+
+.tl-rail {
+  position: relative;
+  flex: 0 0 41px;
+  height: 150px;
+  padding-top: 1px;
+}
+.tl-dot {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #7a7a7a;
+}
+.tl-time {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #7a7a7a;
+  white-space: nowrap;
+}
+/* the thread runs past the card into the next row's gap */
+.tl-line {
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 1px;
+  height: 144px;
+  background: rgba(122, 122, 122, 0.35);
+}
+
+.tl-card {
+  position: relative;
+  flex: 0 0 310px;
+  height: 150px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  overflow: hidden;
+  background: #2b2b2b;
+  padding: 16px;
+  transition: filter 0.6s ease, opacity 0.6s ease, scale 0.5s var(--ease-out);
+}
+.tl-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* the Figma crops these two off-centre */
+.ph-louvre { height: 210.88%; top: -61.9%; inset: auto; left: 0; }
+.ph-qasr { height: 193.07%; top: -38.99%; inset: auto; left: 0; }
+
+.tl-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(169deg, rgba(0, 0, 0, 0) 12.4%, rgba(0, 0, 0, 0.51) 44%);
+}
+.tl-meta {
+  position: relative;
+  height: 100%;
+  width: 208px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.tl-name { font-size: 24px; font-weight: 500; line-height: 1.2; color: var(--white); }
+.tl-name b { font-weight: 700; }
+.tl-note { font-size: 12px; font-weight: 500; line-height: normal; color: var(--white); }
+
+.tl-more {
+  position: absolute;
+  right: 8px;
+  top: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-btn);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.tl-more img { width: 3px; height: 3px; display: block; }
+
+.tl-qasr { cursor: pointer; }
+.tl-qasr:active, .tl-card.pressed { scale: 0.975; }
+
+/* ── opening a stop: the day recedes, the card grows ── */
+
+/* the rest of the day blurs back, as in the second frame */
+.s-plan[data-state="open"] .tl-row:not(:last-child) .tl-card { filter: blur(10px); opacity: 0.9; }
+.s-plan[data-state="open"] .tl-row:last-child .tl-card { filter: blur(2px); opacity: 0; }
+.s-plan[data-state="open"] .plan-scroll { pointer-events: none; }
+
+.plan-veil {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+}
+.plan-veil-top {
+  top: 0;
+  height: 524px;
+  background: linear-gradient(to bottom, #fff 0%, rgba(255, 255, 255, 0.24) 100%);
+}
+.plan-veil-bottom {
+  bottom: -30px;
+  height: 370px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #fff 100%);
+}
+.s-plan[data-state="open"] .plan-veil { opacity: 1; }
+
+/* The detail card is one element that starts life exactly over the card the
+   finger touched (its rect is measured and written into these vars), then
+   travels to the resting geometry the design gives it. */
+.detail-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--dc-w, 310px);
+  height: var(--dc-h, 150px);
+  translate: var(--dc-x, 0) var(--dc-y, 0);
+  rotate: var(--dc-r, 0deg);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--dc-radius, 24px);
+  overflow: hidden;
+  background: #2b2b2b;
+  padding: var(--dc-pad, 16px);
+  z-index: 20;
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: 0 24px 56px rgba(41, 38, 47, 0.22);
+  transition:
+    translate 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.7s ease;
+}
+.detail-card.on { opacity: 1; visibility: visible; }
+/* no transition while the start rect is being planted */
+.detail-card.placing { transition: none; }
+
+.detail-grad { background: linear-gradient(165deg, rgba(0, 0, 0, 0) 12.4%, rgba(0, 0, 0, 0.51) 44%); }
+
+.detail-meta { position: relative; width: 230px; }
+.detail-name {
+  font-size: var(--dc-title, 24px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--white);
+  transition: font-size 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.detail-note {
+  margin-top: 7px;
+  font-size: var(--dc-note, 12px);
+  font-weight: 500;
+  line-height: normal;
+  color: var(--white);
+  transition: font-size 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* the explanation strip only belongs to the opened state */
+.detail-info {
+  position: absolute;
+  left: 4px;
+  bottom: 8px;
+  width: 343.7px;
+  height: 58.8px;
+  border-radius: 27px 46px 46px 27px;
+  background: rgba(255, 255, 255, 0.17);
+  box-shadow: 0 19.4px 21.4px -13.7px rgba(41, 38, 47, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px 5px 14px;
+  opacity: 0;
+  transition: opacity 0.45s ease 0.3s;
+}
+.detail-info img { flex: 0 0 18px; display: block; }
+.detail-info p {
+  font-size: 12.6px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--white);
+}
+.s-plan[data-state="open"] .detail-info { opacity: 1; }
+
+/* ── the actions under the opened stop ── */
+
+.detail-actions {
+  position: absolute;
+  left: 50%;
+  top: 508px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 21;
+  opacity: 0;
+  translate: 0 14px;
+  pointer-events: none;
+  transition: opacity 0.5s ease 0.32s, translate 0.6s var(--ease-out) 0.32s;
+}
+.s-plan[data-state="open"] .detail-actions {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+.act-share, .act-edit {
+  width: 168px;
+  height: 64px;
+  border-radius: var(--r-btn);
+  border: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.18s var(--ease-out);
+}
+.act-share {
+  background: var(--brand-palm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  filter: drop-shadow(0 17px 9.35px rgba(41, 38, 47, 0.1));
+}
+.act-edit {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--black);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1);
+}
+.act-share:active, .act-edit:active { transform: scale(0.97); }
+
+/* ── the plan's own chrome ── */
+
+.plan-back { left: 16px; top: 38px; background: rgba(255, 255, 255, 0.2); box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1); }
+.plan-controls { position: absolute; left: 295px; top: 55px; display: block; }
+
 /* ─────────────────────── Mobile (real device) ─────────────────────── */
 
 @media (max-width: 560px), (max-height: 700px) {
@@ -1768,6 +2093,8 @@ button.lg:active::after {
   .qw, .voice-answer .w { transition-duration: 1ms; }
   .ev-first, .ev-mid, .ev-last,
   .sk-card, .sug-card, .tab-glider,
+  .detail-card, .detail-name, .detail-note,
+  .detail-info, .detail-actions, .plan-veil,
   .se-heading { transition-duration: 1ms; }
   .touch-cursor { display: none; }
 }
