@@ -1850,9 +1850,11 @@ button.lg:active::after {
   height: 100%;
   object-fit: cover;
 }
-/* the Figma crops these two off-centre */
-.ph-louvre { height: 210.88%; top: -61.9%; inset: auto; left: 0; }
-.ph-qasr { height: 193.07%; top: -38.99%; inset: auto; left: 0; }
+/* the Figma crops these two off-centre. Only `top` and `height` are
+   overridden — an `inset` shorthand here would reset `top` back to auto and
+   drop the image to its static position. */
+.ph-louvre { top: -61.9%; bottom: auto; height: 210.88%; }
+.ph-qasr { top: -38.99%; bottom: auto; height: 193.07%; }
 
 .tl-grad {
   position: absolute;
