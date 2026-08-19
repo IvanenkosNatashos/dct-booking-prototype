@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Al Hosn Trip · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=7">
 </head>
 <body>
   <!-- Liquid Glass lens filters: organic displacement of the backdrop,
@@ -503,15 +503,10 @@
           </header>
 
           <div class="home-botfade"></div>
-          <nav class="home-nav lg" data-in style="--i:1" aria-label="App sections">
-            <img src="assets/icon-home.svg" alt="Home" width="22" height="22">
-            <img src="assets/icon-element3.svg" alt="Browse" width="20" height="20">
-            <button class="nav-spark" data-action="none" aria-label="Ask Abu Dhabi">
-              <img src="assets/nav-sparkle.svg" alt="">
-            </button>
-            <img src="assets/icon-briefcase.svg" alt="Trips" width="20" height="20">
-            <img src="assets/icon-profile.svg" alt="Profile" width="24" height="24">
-          </nav>
+          <!-- the tab bar is one flattened export (33:832), so its glass and
+               the sparkle's glow read exactly as designed -->
+          <img class="home-nav" src="assets/home-navbar.png" alt="App sections"
+               width="390" height="130" data-in style="--i:1">
         </section>
 
         <!-- ── the reworked card, shared across steps 6→8 ──
@@ -540,6 +535,6 @@
     </footer>
   </div>
 
-  <script src="js/app.js?v=6"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
