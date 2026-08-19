@@ -275,6 +275,8 @@
 
   /* ── flow switcher ── */
   const flowTabs = document.getElementById('flow-tabs');
+  const FLOW_KEY = 'dct-proto-flow';
+
   function positionFlowGlider() {
     const active = flowTabs.querySelector('.flow-tab.active');
     const glider = flowTabs.querySelector('.flow-glider');
@@ -282,18 +284,37 @@
     glider.style.width = `${active.offsetWidth}px`;
     glider.style.translate = `${active.offsetLeft}px 0`;
   }
+
+  /* mark a tab as current, without touching the flow itself */
+  function markFlowTab(name) {
+    flowTabs.querySelectorAll('.flow-tab').forEach(b =>
+      b.classList.toggle('active', b.dataset.flow === name));
+    positionFlowGlider();
+  }
+
   flowTabs.addEventListener('click', e => {
     const tab = e.target.closest('.flow-tab');
     if (!tab || tab.classList.contains('active')) return;
-    flowTabs.querySelectorAll('.flow-tab').forEach(b => b.classList.remove('active'));
-    tab.classList.add('active');
-    positionFlowGlider();
+    markFlowTab(tab.dataset.flow);
     startFlow(tab.dataset.flow);
   });
   document.fonts.ready.then(positionFlowGlider);
   window.addEventListener('resize', positionFlowGlider);
 
+  /* remember the open tab so a reload resumes where the reviewer left off
+     (storage is unavailable in some embeds — the flow must still run) */
+  function rememberFlow(name) {
+    try { localStorage.setItem(FLOW_KEY, name); } catch (e) { /* no-op */ }
+  }
+  function rememberedFlow() {
+    try {
+      const saved = localStorage.getItem(FLOW_KEY);
+      return FLOWS[saved] ? saved : null;
+    } catch (e) { return null; }
+  }
+
   function startFlow(name) {
+    rememberFlow(name);
     clearTimers();
     EXIT[stepScreen(FLOW[stepIndex])] && EXIT[stepScreen(FLOW[stepIndex])]();
     screens[stepScreen(FLOW[stepIndex])].classList.remove('active');
@@ -606,7 +627,13 @@
   /* dev hook for demos/tests (e.g. jump to a step from the console) */
   window.__proto = { goStep, startFlow, FLOWS, step: () => FLOW[stepIndex] };
 
-  buildDots();
-  renderDots();
-  STEP[FLOW[0]]({ changedScreen: true });
+  const resume = rememberedFlow();
+  if (resume && resume !== activeFlow) {
+    markFlowTab(resume);
+    startFlow(resume);                       // reopen the tab last reviewed
+  } else {
+    buildDots();
+    renderDots();
+    STEP[FLOW[0]]({ changedScreen: true });
+  }
 })();
