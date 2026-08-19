@@ -23,6 +23,7 @@
     ],
     home: ['home:top', 'home:banner'],
     plan: ['plan:top', 'plan:bottom', 'plan:open'],
+    arrive: ['arrive:stop', 'arrive:order'],
   };
 
   const screens = {};
@@ -518,6 +519,18 @@
     if (planScreen.dataset.state !== 'open') goStep(FLOW.indexOf('plan:open'));
   });
 
+  /* ════════════ Arriving-at-lunch flow ════════════ */
+
+  const arriveScreen = screens.arrive;
+  const hereBtn = document.getElementById('here-btn');
+  const arrReply = document.getElementById('arr-reply');
+  wrapWords(arrReply);
+
+  /* "I'm here" is the whole interaction — tap it yourself or watch it happen */
+  hereBtn.addEventListener('click', () => {
+    if (arriveScreen.dataset.state !== 'order') goStep(FLOW.indexOf('arrive:order'));
+  });
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -664,6 +677,23 @@
       stopGlide();
       openStop();
     },
+
+    /* ── arriving at lunch ── */
+    'arrive:stop'() {
+      arriveScreen.dataset.state = 'stop';
+      hush(arrReply);
+      restartEntrance(arriveScreen);
+      at(2600, () => ghostTap(hereBtn));       // Wei says she's there
+      at(3000, next);
+    },
+    'arrive:order'() {
+      // release the entrance first — its forwards fill would otherwise pin the
+      // stop card and CTA visible, and they could never fade out
+      holdEntrance(arriveScreen);
+      arriveScreen.dataset.state = 'order';
+      // the reply speaks itself once the dishes are settling in
+      timers.push(...speak(arrReply, { interval: 105, delay: 620 }));
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -702,6 +732,7 @@
     search() {},
     home() { stopGlide(); },
     plan() { stopGlide(); closeStop(); },
+    arrive() { hush(arrReply); arriveScreen.dataset.state = 'stop'; },
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */

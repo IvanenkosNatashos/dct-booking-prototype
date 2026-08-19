@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Al Hosn Trip · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="css/styles.css?v=12">
+  <link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
   <!-- Liquid Glass lens filters: organic displacement of the backdrop,
@@ -42,6 +42,7 @@
         <button class="flow-tab" data-flow="rework">Nana · Reworking the day</button>
         <button class="flow-tab" data-flow="home">Wei · Taking shape</button>
         <button class="flow-tab" data-flow="plan">Wei · Opening a stop</button>
+        <button class="flow-tab" data-flow="arrive">Wei · Arriving at lunch</button>
       </nav>
     </header>
 
@@ -629,6 +630,69 @@
                width="390" height="130" data-in style="--i:1">
         </section>
 
+        <!-- ═══════ Arriving-at-lunch flow · next stop → order (34:2403 → 34:2426) ═══════ -->
+        <section class="screen s-arrive" data-screen="arrive" data-state="stop">
+          <!-- the restaurant, blurred behind the whole screen -->
+          <div class="arr-bg">
+            <img class="cover" src="assets/tl-fanar.jpg" alt="">
+            <div class="arr-grad"></div>
+          </div>
+
+          <button class="circle-btn arr-back lg lg-sm" data-action="none" aria-label="Back" data-in style="--i:0">
+            <img src="assets/icon-arrow-left-white.svg" alt="" width="24" height="24">
+          </button>
+          <img class="arr-controls" src="assets/plan-header-btns.svg" alt="" width="75" height="30" data-in style="--i:0">
+
+          <!-- ── the stop card ── -->
+          <p class="arr-heading" data-in style="--i:1">Your Next Stop:</p>
+          <article class="arr-card" data-in style="--i:2">
+            <img class="cover kenburns" src="assets/tl-fanar.jpg" alt="Al Fanar">
+            <div class="arr-card-grad"></div>
+            <div class="arr-card-meta">
+              <p class="arr-card-name">Al Fanar - Lunch</p>
+              <p class="arr-card-note">2 min walk · kids' menu</p>
+            </div>
+          </article>
+          <div class="arr-fade"></div>
+          <button class="arr-cta breathe" id="here-btn" data-action="none" data-in style="--i:3">I'm here</button>
+          <div class="home-indicator hi-light arr-hi"></div>
+
+          <!-- ── the recommendation, revealed by the tap ── -->
+          <span class="arr-thumb">
+            <img src="assets/tl-fanar.jpg" alt="">
+          </span>
+          <p class="arr-echo">I'm here. What should I order?</p>
+          <p class="arr-reply" id="arr-reply">Based on what guests love here, I'd recommend you:</p>
+
+          <div class="dish-row">
+            <article class="dish-card" style="--d:0">
+              <img class="cover" src="assets/dish-hammour.jpg" alt="Grilled hammour">
+              <div class="dish-grad"></div>
+              <button class="dish-add" data-action="none" aria-label="Add Grilled hammour">
+                <img src="assets/icon-add-white.svg" alt="" width="24" height="24">
+              </button>
+              <div class="dish-meta">
+                <p class="dish-name">Grilled hammour</p>
+                <p class="dish-likes"><img src="assets/icon-heart.svg" alt="" width="20" height="20">312 people liked</p>
+              </div>
+            </article>
+            <article class="dish-card" style="--d:1">
+              <img class="cover" src="assets/dish-mezze.jpg" alt="Mezze platter">
+              <div class="dish-grad"></div>
+              <button class="dish-add" data-action="none" aria-label="Add Mezze platter">
+                <img src="assets/icon-add-white.svg" alt="" width="24" height="24">
+              </button>
+              <div class="dish-meta">
+                <p class="dish-name">Mezze platter</p>
+                <p class="dish-likes"><img src="assets/icon-heart.svg" alt="" width="20" height="20">296 people liked</p>
+              </div>
+            </article>
+          </div>
+
+          <img class="home-nav arr-nav" src="assets/home-navbar.png" alt="App sections"
+               width="390" height="130">
+        </section>
+
         <!-- ── the reworked card, shared across steps 6→8 ──
              One element riding above the screens from the adding moment until
              the schedule takes over, so the card can never blink or double
@@ -655,6 +719,6 @@
     </footer>
   </div>
 
-  <script src="js/app.js?v=12"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>
