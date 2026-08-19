@@ -1721,6 +1721,10 @@ button.lg:active::after {
   height: 117px;
   display: block;
   pointer-events: none;
+  /* the baked backdrop left square shoulders outside the bar's own corners,
+     so the image is clipped to the bar's radius; the bottom is already cut
+     by the phone's own rounding */
+  border-radius: var(--r-device) var(--r-device) 0 0;
 }
 
 /* ═══════════ Opening-a-stop flow · the day plan and its detail card ═══════════ */
@@ -1917,6 +1921,12 @@ button.lg:active::after {
 .s-plan[data-state="open"] .tl-row:last-child .tl-card { filter: blur(2px); opacity: 0; }
 .s-plan[data-state="open"] .plan-scroll { pointer-events: none; }
 
+/* the rail has no wash of its own, so it would sit sharp over the receded
+   day — it fades out with the stop open (opacity, not display, so the cards
+   keep their column position) */
+.tl-rail { transition: opacity 0.5s ease; }
+.s-plan[data-state="open"] .tl-rail { opacity: 0; }
+
 /* the veils are now pure tint, and each fades to nothing at its inner edge so
    the two meet continuously instead of stepping */
 .plan-veil {
@@ -1998,7 +2008,9 @@ button.lg:active::after {
   bottom: 8px;
   width: 343.7px;
   height: 58.8px;
-  border-radius: 27px 46px 46px 27px;
+  /* a true pill: the design's 27/46 pair clamps to a semicircle on the right
+     but leaves a flat on the left, so the two ends read differently */
+  border-radius: 100px;
   background: rgba(255, 255, 255, 0.17);
   box-shadow: 0 19.4px 21.4px -13.7px rgba(41, 38, 47, 0.1);
   display: flex;
