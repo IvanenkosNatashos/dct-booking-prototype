@@ -861,6 +861,30 @@ button.lg:active::after {
   animation: loader-spin 1.5s linear infinite;
 }
 
+/* ── The AI loader: one component wherever the companion is working ──
+   A frosted disc, the sweep ring over it, and the two sparkles carrying
+   their own glow. Screens only place it — everything it looks like
+   lives here, so the three of them can never drift apart again. */
+.ai-loader {
+  position: absolute;
+  width: 104px;
+  height: 104px;
+}
+.loader-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+.loader-spark {
+  position: absolute;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+  animation: sparkle-pulse 2.4s ease-in-out infinite;
+}
+.loader-spark.spark-lg { left: 32px; top: 36px; }
+.loader-spark.spark-sm { left: 60px; top: 30px; animation-delay: 0.5s; }
+
 .sparkle { position: absolute; animation: sparkle-pulse 1.8s ease-in-out infinite; }
 .sparkle-big { left: 25px; top: 27px; }
 .sparkle-tiny { left: 46px; top: 22px; animation-delay: 0.5s; }
@@ -1490,16 +1514,8 @@ button.lg:active::after {
 
 /* ── Adding to your itinerary (frame 6) ── */
 
-.ad-loader {
-  position: absolute;
-  left: 143px;
-  top: 586px;
-  width: 104px;
-  height: 104px;
-}
-.ad-loader .sparkle-big { left: 32px; top: 36px; }
-.ad-loader .sparkle-tiny { left: 60px; top: 30px; }
-.arc-tip.big { width: 9px; height: 9px; margin-top: -4.5px; }
+/* placement only — the loader itself is the shared .ai-loader */
+.ad-loader { left: 143px; top: 586px; }
 
 .ad-text {
   left: 22px;
@@ -2587,29 +2603,13 @@ button.lg:active::after {
   z-index: 3;
 }
 
+/* placement only — the loader itself is the shared .ai-loader */
 .gen-loader {
-  position: absolute;
   left: 50%;
   top: 547px;
-  width: 104px;
-  height: 104px;
   z-index: 4;
   transform: translateX(-50%);
 }
-.gen-disc {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-}
-/* the ring itself is the shared .sweep-ring — same component, same beat */
-.gen-spark {
-  position: absolute;
-  display: block;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-}
-.spark-big { left: 32px; top: 36px; animation: sparkle-pulse 2.4s ease-in-out infinite; }
-.spark-sm { left: 60px; top: 30px; animation: sparkle-pulse 2.4s ease-in-out infinite 0.5s; }
 
 .gen-text {
   position: absolute;
@@ -3024,7 +3024,7 @@ button.lg:active::after {
   .gen-card,
   .gen-sheen,
   .sweep-ring,
-  .gen-spark,
+  .loader-spark,
   .spa-glow img,
   .breathe { animation: none; }
   .spa-field, .spa-wash, .spa-card, .spa-chips, .spa-details, .spa-meta,

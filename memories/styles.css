@@ -436,6 +436,44 @@ button.lg:active::after {
 
 /* ── the two loader beats this flow borrows from the booking prototype ── */
 @keyframes loader-spin { to { rotate: 360deg; } }
+
+/* Figma's "Loader anim" ring: a conic sweep running clear → solid white
+   clockwise and ending flat at three o'clock, masked down to an 8px band
+   on a 104px circle. */
+.sweep-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  animation: loader-spin 1.5s linear infinite;
+}
+
+/* ── The AI loader: one component wherever the companion is working ──
+   A frosted disc, the sweep ring over it, and the two sparkles carrying
+   their own glow. Screens only place it — everything it looks like
+   lives here, so they can never drift apart again. */
+.ai-loader {
+  position: absolute;
+  width: 104px;
+  height: 104px;
+}
+.loader-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+.loader-spark {
+  position: absolute;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+  animation: sparkle-pulse 2.4s ease-in-out infinite;
+}
+.loader-spark.spark-lg { left: 32px; top: 36px; }
+.loader-spark.spark-sm { left: 60px; top: 30px; animation-delay: 0.5s; }
+
 @keyframes sparkle-pulse {
   0%, 100% { opacity: 1; scale: 1; }
   50% { opacity: 0.6; scale: 0.88; }
@@ -760,40 +798,13 @@ button.lg:active::after {
   z-index: 3;
 }
 
+/* placement only — the loader itself is the shared .ai-loader */
 .gen-loader {
-  position: absolute;
   left: 50%;
   top: 547px;
-  width: 104px;
-  height: 104px;
   z-index: 4;
   transform: translateX(-50%);
 }
-.gen-disc {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-}
-/* Figma's "Loader anim" ring: a conic sweep running clear → solid white
-   clockwise and ending flat at three o'clock, masked down to an 8px band
-   on a 104px circle. */
-.sweep-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
-  animation: loader-spin 1.5s linear infinite;
-}
-.gen-spark {
-  position: absolute;
-  display: block;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-}
-.spark-big { left: 32px; top: 36px; animation: sparkle-pulse 2.4s ease-in-out infinite; }
-.spark-sm { left: 60px; top: 30px; animation: sparkle-pulse 2.4s ease-in-out infinite 0.5s; }
 
 .gen-text {
   position: absolute;
@@ -955,7 +966,7 @@ button.lg:active::after {
   .gen-card,
   .gen-sheen,
   .sweep-ring,
-  .gen-spark,
+  .loader-spark,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }
   .qw { transition-duration: 1ms; }
