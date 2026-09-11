@@ -567,7 +567,13 @@ button.lg:active::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  /* A dark puck, not a 6%-white one. The Figma frames only ever set this
+     loader on dark ground, so a light disc was enough there — but over the
+     spa photo's blown-out highlights a white ring on white scores 1:1 and
+     vanishes. The puck plus its feathered halo give the ring something to
+     sit on whatever is behind it. */
+  background: rgba(24, 8, 28, 0.4);
+  box-shadow: 0 0 26px 12px rgba(24, 8, 28, 0.22);
 }
 .loader-spark {
   position: absolute;
