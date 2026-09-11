@@ -846,6 +846,21 @@ button.lg:active::after {
 }
 @keyframes loader-spin { to { rotate: 360deg; } }
 
+/* Figma's "Loader anim" ring, shared by every screen that files something
+   away: a conic sweep running clear → solid white clockwise and ending
+   flat at three o'clock, masked down to an 8px band on a 104px circle.
+   (The older arc-plus-dot above belongs to the booking skeletons; this is
+   the ring the newer frames actually draw.) */
+.sweep-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  animation: loader-spin 1.5s linear infinite;
+}
+
 .sparkle { position: absolute; animation: sparkle-pulse 1.8s ease-in-out infinite; }
 .sparkle-big { left: 25px; top: 27px; }
 .sparkle-tiny { left: 46px; top: 22px; animation-delay: 0.5s; }
@@ -2587,21 +2602,7 @@ button.lg:active::after {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
 }
-/* the arc: a conic sweep masked down to a 4px rim, turning once a second
-   and a half — the same beat as the booking flow's skeleton loader */
-.gen-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(from 90deg,
-    rgba(255, 255, 255, 0) 0deg,
-    rgba(255, 255, 255, 0.05) 30deg,
-    rgba(255, 255, 255, 0.95) 330deg,
-    rgba(255, 255, 255, 0) 360deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.2px));
-  animation: loader-spin 1.5s linear infinite;
-}
+/* the ring itself is the shared .sweep-ring — same component, same beat */
 .gen-spark {
   position: absolute;
   display: block;
@@ -3022,7 +3023,7 @@ button.lg:active::after {
   .s-ask.active .teal-wave-wrap,
   .gen-card,
   .gen-sheen,
-  .gen-ring,
+  .sweep-ring,
   .gen-spark,
   .spa-glow img,
   .breathe { animation: none; }

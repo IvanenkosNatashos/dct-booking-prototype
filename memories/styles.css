@@ -775,19 +775,16 @@ button.lg:active::after {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
 }
-/* the arc: a conic sweep masked down to a 4px rim, turning once a second
-   and a half — the same beat as the booking flow's skeleton loader */
-.gen-ring {
+/* Figma's "Loader anim" ring: a conic sweep running clear → solid white
+   clockwise and ending flat at three o'clock, masked down to an 8px band
+   on a 104px circle. */
+.sweep-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from 90deg,
-    rgba(255, 255, 255, 0) 0deg,
-    rgba(255, 255, 255, 0.05) 30deg,
-    rgba(255, 255, 255, 0.95) 330deg,
-    rgba(255, 255, 255, 0) 360deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4.4px), #000 calc(100% - 4.2px));
+  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
   animation: loader-spin 1.5s linear infinite;
 }
 .gen-spark {
@@ -957,7 +954,7 @@ button.lg:active::after {
   .kenburns,
   .gen-card,
   .gen-sheen,
-  .gen-ring,
+  .sweep-ring,
   .gen-spark,
   .breathe { animation: none; }
   [data-in] { animation-duration: 1ms; }

@@ -549,23 +549,21 @@ button.lg:active::after {
   100% { opacity: 0; }
 }
 
-.arc-wrap {
+@keyframes loader-spin { to { rotate: 360deg; } }
+
+/* Figma's "Loader anim" ring: a conic sweep running clear → solid white
+   clockwise and ending flat at three o'clock, masked down to an 8px band
+   on a 104px circle. */
+.sweep-ring {
   position: absolute;
   inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
   animation: loader-spin 1.5s linear infinite;
 }
-.arc-wrap img { position: absolute; inset: 0; }
-.arc-tip {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  margin-top: -3.5px;
-  border-radius: 50%;
-  background: var(--white);
-}
-@keyframes loader-spin { to { rotate: 360deg; } }
+
 
 .sparkle { position: absolute; animation: sparkle-pulse 1.8s ease-in-out infinite; }
 .sparkle-big { left: 25px; top: 27px; }
@@ -586,7 +584,6 @@ button.lg:active::after {
 }
 .ad-loader .sparkle-big { left: 32px; top: 36px; }
 .ad-loader .sparkle-tiny { left: 60px; top: 30px; }
-.arc-tip.big { width: 9px; height: 9px; margin-top: -4.5px; }
 
 .ad-text {
   left: 22px;
@@ -854,7 +851,7 @@ button.lg:active::after {
   .voice-pill .pill-active img,
   .voice-pill .pill-glow,
   .kenburns,
-  .arc-wrap,
+  .sweep-ring,
   .sparkle,
   .spa-glow img,
   .breathe { animation: none; }
