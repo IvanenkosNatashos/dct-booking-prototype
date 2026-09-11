@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Al Hosn Trip · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="css/styles.css?v=17">
+  <link rel="stylesheet" href="css/styles.css?v=18">
 </head>
 <body>
   <!-- Liquid Glass lens filters: organic displacement of the backdrop,
@@ -43,6 +43,7 @@
         <button class="flow-tab" data-flow="home">Wei · Taking shape</button>
         <button class="flow-tab" data-flow="plan">Wei · Opening a stop</button>
         <button class="flow-tab" data-flow="arrive">Wei · Arriving at lunch</button>
+        <button class="flow-tab" data-flow="memories">Nana · Video memories</button>
       </nav>
     </header>
 
@@ -691,6 +692,109 @@
                width="390" height="117">
         </section>
 
+        <!-- ─── Screen · Video memories board (48:579 → 48:605) ───
+             Two steps on one screen: the board, then the same board frosted
+             back while the companion reads the trip out loud. The blur has to
+             rise over the real collage, so this can never be two screens. -->
+        <section class="screen s-vm theme-light" data-screen="vm" data-state="board">
+          <img class="vm-field" src="assets/vm-lilac.svg" alt="" aria-hidden="true">
+
+          <h1 class="vm-title" data-in style="--i:0">Make your<br aria-hidden="true">Video Memories</h1>
+
+          <div class="vm-collage">
+            <article class="vm-card vm-louvre" data-in style="--i:1">
+              <img class="cover kenburns" src="assets/vm-louvre.jpg" alt="Louvre Abu Dhabi">
+            </article>
+            <article class="vm-card vm-mazi" data-in style="--i:2">
+              <img class="cover kenburns" src="assets/vm-mazi.jpg" alt="Dinner at Mazi">
+            </article>
+            <article class="vm-card vm-spa" data-in style="--i:3">
+              <img class="cover kenburns" src="assets/vm-spa.jpg" alt="Spa morning">
+            </article>
+            <div class="vm-slot" data-in style="--i:4">
+              <img src="assets/icon-gallery-edit.svg" alt="" width="32" height="32">
+            </div>
+            <span class="vm-tag tag-mazi" data-in style="--i:3">Mazi</span>
+            <span class="vm-tag tag-spa" data-in style="--i:4">Spa</span>
+          </div>
+
+          <div class="trip-bar bar-light lg vm-bar" data-in style="--i:2">
+            <span class="trip-thumb"><img src="assets/vm-shoptalk.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Luxe ShopTalk</p>
+              <p class="tb-duration grey-text">4 days · 2-4 Feb</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
+          </div>
+
+          <!-- the frost that settles over the board while the companion talks -->
+          <div class="vm-sheet"></div>
+          <p class="vm-prompt" id="vm-prompt">Let’s generate the Video memories</p>
+          <button class="vm-gen" id="vm-gen" data-action="none" aria-label="Generate the video memories">
+            <img src="assets/vm-gen-pill.svg" alt="" width="169" height="88">
+          </button>
+
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+        <!-- ─── Screen · Generating the memories (48:628) ─── -->
+        <section class="screen s-gen" data-screen="gen">
+          <img class="gen-streak" src="assets/vm-streak.svg" alt="" aria-hidden="true">
+
+          <article class="gen-card gen-left" data-in style="--i:1">
+            <img class="cover kenburns" src="assets/vm-corniche.jpg" alt="">
+          </article>
+          <article class="gen-card gen-right" data-in style="--i:2">
+            <img class="cover kenburns" src="assets/vm-spa-room.jpg" alt="">
+          </article>
+          <article class="gen-card gen-mid" data-in style="--i:0">
+            <img class="cover kenburns" src="assets/vm-hall.jpg" alt="">
+            <span class="gen-sheen"></span>
+          </article>
+
+          <div class="gen-veil"></div>
+
+          <div class="gen-loader" data-in style="--i:3">
+            <span class="gen-disc lg lg-sm"></span>
+            <span class="gen-ring"></span>
+            <img class="gen-spark spark-big" src="assets/sparkle-fig-lg.svg" alt="" width="38" height="38">
+            <img class="gen-spark spark-sm" src="assets/sparkle-fig-sm.svg" alt="" width="12" height="12">
+          </div>
+          <p class="gen-text" id="gen-text" aria-live="polite">Generating Your<br aria-hidden="true">Trip Memories</p>
+
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ─── Screen · Your trip highlights (48:644) ─── -->
+        <section class="screen s-high theme-light" data-screen="high">
+          <img class="vm-field high-field" src="assets/vm-lilac.svg" alt="" aria-hidden="true">
+
+          <p class="high-intro" data-in style="--i:0">You leaned into waterfront walks, scenic runs,
+            spa mornings and destination dining.</p>
+
+          <article class="high-card high-back" data-in style="--i:1">
+            <img class="cover" src="assets/vm-corniche.jpg" alt="">
+          </article>
+          <article class="high-card high-front" data-in style="--i:1">
+            <img class="cover kenburns" src="assets/vm-waterfront.jpg" alt="Walking the Corniche">
+            <div class="high-grad"></div>
+          </article>
+          <p class="high-days" data-in style="--i:2">4 Days</p>
+          <h2 class="high-title" data-in style="--i:2">Your Trip<br aria-hidden="true">Highlights</h2>
+
+          <span class="high-pill" data-in style="--i:3">Ready to share</span>
+          <figure class="high-quote" data-in style="--i:4">
+            <img src="assets/vm-avatar.jpg" alt="" width="40" height="40">
+            <figcaption>Unforgettable Middle East experience!</figcaption>
+          </figure>
+
+          <button class="high-share breathe" data-action="none" data-in style="--i:5">Share</button>
+
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
         <!-- ── the reworked card, shared across steps 6→8 ──
              One element riding above the screens from the adding moment until
              the schedule takes over, so the card can never blink or double
@@ -717,6 +821,6 @@
     </footer>
   </div>
 
-  <script src="js/app.js?v=17"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

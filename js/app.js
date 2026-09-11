@@ -24,6 +24,7 @@
     home: ['home:top', 'home:banner'],
     plan: ['plan:top', 'plan:bottom', 'plan:open'],
     arrive: ['arrive:stop', 'arrive:order'],
+    memories: ['vm:board', 'vm:prompt', 'gen', 'high'],
   };
 
   const screens = {};
@@ -248,7 +249,7 @@
   function prev() {
     // never step back into an auto-forwarding loader
     let target = stepIndex - 1;
-    const skip = ['loading', 'search:searching', 'adding'];
+    const skip = ['loading', 'search:searching', 'adding', 'gen'];
     if (skip.includes(FLOW[target])) target -= 1;
     goStep(target);
   }
@@ -531,6 +532,28 @@
     if (arriveScreen.dataset.state !== 'order') goStep(FLOW.indexOf('arrive:order'));
   });
 
+  /* ════════════ Video-memories flow ════════════ */
+
+  const vmScreen = screens.vm;
+  const vmPrompt = document.getElementById('vm-prompt');
+  const vmGen = document.getElementById('vm-gen');
+  const genText = document.getElementById('gen-text');
+
+  sliceGradient(vmPrompt, '#000000 0%, rgba(0,0,0,0.55) 100%');
+  wrapWords(genText);
+
+  /* pressing generate yourself is the same beat the companion plays */
+  vmGen.addEventListener('click', () => {
+    if (FLOW[stepIndex] === 'vm:prompt') next();
+  });
+
+  /* tap anywhere else to skip the moments that auto-forward */
+  vmScreen.addEventListener('click', e => {
+    if (e.target.closest('.vm-gen')) return;
+    next();
+  });
+  screens.gen.addEventListener('click', next);
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -694,6 +717,38 @@
       // the reply speaks itself once the dishes are settling in
       timers.push(...speak(arrReply, { interval: 105, delay: 620 }));
     },
+
+    /* ── video memories ── */
+    'vm:board'() {
+      // a restart opens on the bare board, no frost left over
+      snap(vmScreen, () => { vmScreen.dataset.state = 'board'; });
+      unlit(vmPrompt);
+      restartEntrance(vmScreen);
+      at(3200, next);                          // the board settles, then is read back
+    },
+    'vm:prompt'() {
+      // release the entrance's forwards fill so the trip bar can sink away
+      holdEntrance(vmScreen);
+      vmScreen.dataset.state = 'prompt';       // the frost rises over the board
+      unlit(vmPrompt);
+      const words = vmPrompt.querySelectorAll('.w');
+      // the sentence starts once the frost has most of the board — the words
+      // should look like they are settling onto it, not racing it
+      at(900, () => {
+        words.forEach((w, i) => at(i * 185, () => w.classList.add('on')));
+      });
+      const spoken = 900 + words.length * 185 + 850;
+      at(spoken, () => ghostTap(vmGen));       // the companion presses generate
+      at(spoken + 560, next);
+    },
+    gen() {
+      hush(genText);
+      timers.push(...speak(genText, { interval: 130, delay: 1000 }));
+      at(4800, next);
+    },
+    high() {
+      // nothing scripted: the card landing out of the dark is the whole moment
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -733,6 +788,9 @@
     home() { stopGlide(); },
     plan() { stopGlide(); closeStop(); },
     arrive() { hush(arrReply); arriveScreen.dataset.state = 'stop'; },
+    vm() { vmScreen.dataset.state = 'board'; unlit(vmPrompt); },
+    gen() { hush(genText); },
+    high() {},
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */
