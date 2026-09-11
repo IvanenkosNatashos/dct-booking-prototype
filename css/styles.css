@@ -846,25 +846,14 @@ button.lg:active::after {
 }
 @keyframes loader-spin { to { rotate: 360deg; } }
 
-/* Figma's "Loader anim" ring, shared by every screen that files something
-   away: a conic sweep running clear → solid white clockwise and ending
-   flat at three o'clock, masked down to an 8px band on a 104px circle.
-   (The older arc-plus-dot above belongs to the booking skeletons; this is
-   the ring the newer frames actually draw.) */
-.sweep-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(from 90deg, rgba(255, 255, 255, 0) 0deg, #ffffff 360deg);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 8.4px), #000 calc(100% - 7.6px));
-  animation: loader-spin 1.5s linear infinite;
-}
 
 /* ── The AI loader: one component wherever the companion is working ──
-   A frosted disc, the sweep ring over it, and the two sparkles carrying
-   their own glow. Screens only place it — everything it looks like
-   lives here, so the three of them can never drift apart again. */
+   Rebuilt on primitives that cannot fail to paint. The sweep used to be a
+   conic-gradient clipped by a mask with calc() in it — three features that
+   all have to work together, and where the mask resolving to nothing takes
+   the whole ring with it. It is now a baked PNG: an image either loads or
+   it does not, and this one does. The puck underneath carries the contrast
+   so the white ring reads on a bright photo as well as on a dark field. */
 .ai-loader {
   position: absolute;
   width: 104px;
@@ -874,18 +863,27 @@ button.lg:active::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  /* A dark puck, not a 6%-white one. The Figma frames only ever set this
-     loader on dark ground, so a light disc was enough there — but over the
-     spa photo's blown-out highlights a white ring on white scores 1:1 and
-     vanishes. The puck plus its feathered halo give the ring something to
-     sit on whatever is behind it. */
-  background: rgba(24, 8, 28, 0.4);
-  box-shadow: 0 0 26px 12px rgba(24, 8, 28, 0.22);
+  background: rgba(24, 8, 28, 0.46);
+  box-shadow: 0 0 26px 12px rgba(24, 8, 28, 0.26);
+  /* a plain blur — no SVG filter reference, which Safari drops */
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  backdrop-filter: blur(6px) saturate(1.2);
+}
+.loader-ring {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: loader-spin 1.5s linear infinite;
 }
 .loader-spark {
   position: absolute;
   display: block;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+  /* a light glow for dark ground and a dark one for bright ground, so the
+     sparkles never disappear into the backdrop either */
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+          drop-shadow(0 1px 4px rgba(24, 8, 28, 0.55));
   animation: sparkle-pulse 2.4s ease-in-out infinite;
 }
 .loader-spark.spark-lg { left: 32px; top: 36px; }
@@ -3029,7 +3027,7 @@ button.lg:active::after {
   .s-ask.active .teal-wave-wrap,
   .gen-card,
   .gen-sheen,
-  .sweep-ring,
+  .loader-ring,
   .loader-spark,
   .spa-glow img,
   .breathe { animation: none; }
