@@ -25,6 +25,7 @@
     plan: ['plan:top', 'plan:bottom', 'plan:open'],
     arrive: ['arrive:stop', 'arrive:order'],
     memories: ['vm:board', 'vm:prompt', 'gen', 'high'],
+    spa: ['spa:offer', 'spa:adding'],
   };
 
   const screens = {};
@@ -554,6 +555,19 @@
   });
   screens.gen.addEventListener('click', next);
 
+  /* ════════════ Ahead-of-schedule flow ════════════ */
+
+  const spaScreen = screens.spa;
+  const spaAdd = document.getElementById('spa-add');
+  const spaAdding = document.getElementById('spa-adding');
+
+  sliceGradient(spaAdding, '#ffffff 0%, rgba(255,255,255,0.42) 100%');
+
+  /* the CTA is the whole interaction — press it yourself or watch Wei do it */
+  spaAdd.addEventListener('click', () => {
+    if (spaScreen.dataset.state !== 'adding') goStep(FLOW.indexOf('spa:adding'));
+  });
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -749,6 +763,25 @@
     high() {
       // nothing scripted: the card landing out of the dark is the whole moment
     },
+
+    /* ── ahead of schedule ── */
+    'spa:offer'() {
+      // a restart opens on the purple field, the card back at the foot
+      snap(spaScreen, () => { spaScreen.dataset.state = 'offer'; });
+      unlit(spaAdding);
+      restartEntrance(spaScreen);
+      at(3000, () => ghostTap(spaAdd));       // Wei takes the suggestion
+      at(3400, next);
+    },
+    'spa:adding'() {
+      // release the entrance first — its forwards fill would otherwise pin the
+      // note, the CTA and the voice bar visible through the morph
+      holdEntrance(spaScreen);
+      spaScreen.dataset.state = 'adding';
+      unlit(spaAdding);
+      // the sentence lights once the card has finished travelling
+      at(1000, () => lit(spaAdding));
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -791,6 +824,7 @@
     vm() { vmScreen.dataset.state = 'board'; unlit(vmPrompt); },
     gen() { hush(genText); },
     high() {},
+    spa() { spaScreen.dataset.state = 'offer'; unlit(spaAdding); },
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */
