@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <title>Race Week · DCT Companion Prototype</title>
-  <link rel="stylesheet" href="styles.css?v=1">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <svg class="lg-defs" aria-hidden="true" focusable="false">
@@ -194,34 +194,108 @@
           <div class="home-indicator hi-light"></div>
         </section>
 
-        <!-- ─── Screen · your race week, planned (from the supplied render) ─── -->
-        <section class="screen s-week" data-screen="week">
+        <!-- ─── Screen · your race week, planned — as the day plan (250:12912) ─── -->
+        <section class="screen s-week theme-light" data-screen="week" data-day="0">
           <div class="week-scroll" id="week-scroll">
-            <article class="week-card">
+            <div class="week-col">
               <p class="week-brand" data-in style="--i:0"><img src="../assets/icon-ask-sparkle.svg" alt="">Ask Abu Dhabi</p>
-              <h2 class="week-title" data-in style="--i:0">Your race week, planned</h2>
-              <div class="week-chips" data-in style="--i:1">
-                <span class="week-chip">Family of four</span>
-                <span class="week-chip">Four days</span>
-                <span class="week-chip">Culture and the race</span>
+              <h1 class="week-title" data-in style="--i:0">Your race week, planned</h1>
+              <p class="week-sub" data-in style="--i:1">Family of four · Four days · Culture and the race</p>
+
+              <nav class="week-days" id="week-days" aria-label="Race week days" data-in style="--i:2">
+                <span class="week-glider" aria-hidden="true"></span>
+                <button class="week-day active" data-day="0">Fri 4</button>
+                <button class="week-day" data-day="1">Sat 5</button>
+                <button class="week-day" data-day="2">Sun 6</button>
+                <button class="week-day" data-day="3">Mon 7</button>
+              </nav>
+
+              <!-- Fri 4 Dec -->
+              <div class="timeline week-list" data-day="0">
+                <div class="tl-row" data-in style="--i:3">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">10:00</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/vm-hall.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Zayed National Museum</b></p><p class="tl-note">The morning · Saadiyat · family ticket</p></div></article>
+                </div>
+                <div class="tl-row" data-in style="--i:4">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">14:00</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/race-garage.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>First practice</b></p><p class="tl-note">After lunch · Yas Marina Circuit</p></div></article>
+                </div>
+                <div class="tl-row" data-in style="--i:5">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">19:30</span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/vm-corniche.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Yas Bay waterfront</b></p><p class="tl-note">Dinner by the water · 5-min walk</p></div></article>
+                </div>
               </div>
-              <div class="week-days">
-                <div class="week-day" data-in style="--i:2"><p class="week-when">Fri 4 Dec</p><p class="week-what">Zayed National Museum in the morning, first practice after lunch</p></div>
-                <div class="week-day" data-in style="--i:3"><p class="week-when">Sat 5 Dec</p><p class="week-what">Yas Waterworld in the morning, the Heritage Village and qualifying after</p></div>
-                <div class="week-day" data-in style="--i:4"><p class="week-when">Sun 6 Dec</p><p class="week-what">Race day. Your sessions stay fixed and the rest fits around them</p></div>
-                <div class="week-day" data-in style="--i:5"><p class="week-when">Mon 7 Dec</p><p class="week-what">Louvre Abu Dhabi before you head home</p></div>
+
+              <!-- Sat 5 Dec -->
+              <div class="timeline week-list" data-day="1" hidden>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">10:00</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/vm-waterfront.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Yas Waterworld</b></p><p class="tl-note">The morning · the kids' pick</p></div></article>
+                </div>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">15:00</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/sug-heritage.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Heritage Village</b></p><p class="tl-note">At the Grand Prix · 20 min</p></div></article>
+                </div>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">17:00</span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/race-garage.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Qualifying</b></p><p class="tl-note">Your seats · gates open 15:00</p></div></article>
+                </div>
               </div>
-              <p class="week-note" data-in style="--i:6">Sample plan. Times to confirm.</p>
-              <p class="week-keep" data-in style="--i:6">Keep this plan on the web and in the EAD App. Nothing is saved until you choose.</p>
-              <div class="week-actions" data-in style="--i:7">
-                <button class="ead-cta wide" data-action="none">Save by email</button>
-                <button class="ead-cta wide ghost" data-action="none">Log in</button>
+
+              <!-- Sun 6 Dec -->
+              <div class="timeline week-list" data-day="2" hidden>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">13:00</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/race-garage.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Race day</b></p><p class="tl-note">Your sessions stay fixed · lights out 17:00</p></div></article>
+                </div>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">20:30</span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/race-mosque.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Grand Mosque at night</b></p><p class="tl-note">The rest fits around the race</p></div></article>
+                </div>
               </div>
-            </article>
+
+              <!-- Mon 7 Dec -->
+              <div class="timeline week-list" data-day="3" hidden>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">09:30</span><span class="tl-line"></span></div>
+                  <article class="tl-card"><img class="tl-photo ph-louvre" src="../assets/tl-louvre.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Louvre Abu Dhabi</b></p><p class="tl-note">Before you head home · 2 hrs</p></div></article>
+                </div>
+                <div class="tl-row">
+                  <div class="tl-rail"><span class="tl-dot"></span><span class="tl-time">14:00</span></div>
+                  <article class="tl-card"><img class="tl-photo" src="../assets/flight.jpg" alt=""><div class="tl-grad"></div>
+                    <div class="tl-meta"><p class="tl-name"><b>Head home</b></p><p class="tl-note">Airport transfer · 35 min</p></div></article>
+                </div>
+              </div>
+
+              <p class="week-note" data-in style="--i:6">Sample plan. Times to confirm. Nothing is saved until you choose.</p>
+            </div>
+          </div>
+
+          <!-- the plan floats a pill over the list — here it is the cold user's next step -->
+          <button class="week-save ead-cta" id="week-save" data-action="none" data-in style="--i:7">Save by email</button>
+
+          <div class="week-fade"></div>
+          <div class="trip-bar bar-light lg week-bar" data-in style="--i:3">
+            <span class="trip-thumb"><img src="../assets/race-garage.jpg" alt=""></span>
+            <div class="trip-details">
+              <p class="tb-name dark-text">Race Week</p>
+              <p class="tb-duration grey-text">4 days · 4–7 Dec</p>
+            </div>
+            <button class="orb lg lg-sm orb-on-light" data-action="none" aria-label="Ask companion">
+              <img src="../assets/orb-dots-figma.svg" alt="" width="48" height="48">
+            </button>
           </div>
           <div class="home-indicator hi-dark"></div>
         </section>
-
 
       </div>
       </div>
@@ -235,6 +309,6 @@
     </footer>
   </div>
 
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

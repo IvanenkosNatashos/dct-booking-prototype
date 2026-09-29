@@ -206,6 +206,22 @@
   });
   screens.build.addEventListener('click', next);
 
+  /* the plan's day tabs: the glider slides, the day's rows arrive */
+  const weekScreen = screens.week;
+  const weekDays = document.getElementById('week-days');
+  function showDay(i) {
+    weekScreen.dataset.day = i;
+    weekDays.querySelectorAll('.week-day').forEach(b => b.classList.toggle('active', +b.dataset.day === i));
+    weekScreen.querySelectorAll('.week-list').forEach(l => {
+      const on = +l.dataset.day === i;
+      l.hidden = !on;
+      l.classList.toggle('arrive', on);
+    });
+  }
+  weekDays.addEventListener('click', e => {
+    const b = e.target.closest('.week-day'); if (b) showDay(+b.dataset.day);
+  });
+
   const STEP = {
     race() {
       stopGlide();
@@ -242,7 +258,9 @@
     },
     week() {
       document.getElementById('week-scroll').scrollTop = 0;
-      restartEntrance(screens.week);
+      weekScreen.querySelectorAll('.week-list').forEach(l => l.classList.remove('arrive'));
+      showDay(0);                              // a restart opens on Friday
+      restartEntrance(weekScreen);
     },
   };
 
