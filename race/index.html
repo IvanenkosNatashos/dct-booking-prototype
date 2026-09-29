@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Race Week · DCT Companion Prototype</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <svg class="lg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="lg-lens" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.009" numOctaves="2" seed="17" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="4" result="soft"/>
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="44" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="lg-lens-sm" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="2" seed="7" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="2.5" result="soft"/>
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="24" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <!-- large panels refract far more gently: at card scale the control-layer
+           displacement reads as a warp rather than as glass -->
+      <filter id="lg-lens-card" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.005" numOctaves="2" seed="23" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="6" result="soft"/>
+        <feDisplacementMap in="SourceGraphic" in2="soft" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="touch-cursor" id="touch-cursor" aria-hidden="true"></div>
+  <div class="stage">
+    <header class="stage-caption">
+      <span class="caption-brand">DCT · Visit Abu Dhabi</span>
+      <span>Khalid · Race week</span>
+    </header>
+
+    <div class="phone-wrap">
+      <div class="phone" id="phone">
+      <div class="phone-screens">
+
+        <!-- ═══════ Race-week flow · Khalid plans the Grand Prix (EAD Sprint) ═══════
+             The event page hands off to the companion for a name, a mood
+             board and a build, then hands back a plan in its own card. -->
+
+        <!-- ─── Screen · the Grand Prix event page ─── -->
+        <section class="screen s-race active" data-screen="race">
+          <div class="race-scroll" id="race-scroll">
+            <div class="race-hero" data-in style="--i:0">
+              <img class="cover kenburns" src="../assets/race-hero.jpg" alt="Formula 1 cars under the lights at Yas Marina Circuit">
+              <div class="race-hero-veil"></div>
+              <div class="race-topbar">
+                <span class="race-back"><img src="../assets/icon-arrow-left-white.svg" alt="">Back</span>
+                <span class="race-tools">
+                  <img src="../assets/icon-heart.svg" alt="" style="filter: brightness(0) invert(1)">
+                  <img src="../assets/icon-share.svg" alt="" style="filter: brightness(0) invert(1)">
+                </span>
+              </div>
+              <h1 class="race-title">Formula 1 Etihad Airways Abu Dhabi Grand Prix</h1>
+              <p class="race-date"><img src="../assets/icon-calendar-ead.svg" alt="">4 to 7 Dec 2026</p>
+              <div class="race-count" id="race-count" aria-label="Countdown to the race">
+                <span class="unit"><b data-u="d">60</b><small>Days</small></span><span class="colon">:</span>
+                <span class="unit"><b data-u="h">01</b><small>Hours</small></span><span class="colon">:</span>
+                <span class="unit"><b data-u="m">30</b><small>Mins</small></span><span class="colon">:</span>
+                <span class="unit"><b data-u="s">00</b><small>Secs</small></span>
+              </div>
+            </div>
+
+            <div class="race-book" data-in style="--i:1">
+              <p class="race-price"><small>From</small><span class="dirham">₯</span><b>1695</b></p>
+              <button class="ead-cta" data-action="none">Book tickets</button>
+            </div>
+
+            <article class="race-ask" data-in style="--i:2">
+              <p class="ask-brand"><img src="../assets/icon-ask-sparkle.svg" alt="">Ask Abu Dhabi</p>
+              <h2 class="ask-title">Build your itinerary in three taps</h2>
+              <div class="ask-lines">
+                <p class="ask-line">We're <span class="ask-chip">a family of four</span></p>
+                <p class="ask-line">coming for <span class="ask-chip">four days</span></p>
+                <p class="ask-line">looking for <span class="ask-chip">culture and the race</span></p>
+              </div>
+              <p class="ask-note">From the ad you tapped and trips like yours. Tap any part to change it.</p>
+              <button class="ead-cta wide" id="race-build" data-action="none">Build our week</button>
+            </article>
+          </div>
+        </section>
+
+        <!-- ─── Screen · a name for the trip (246:11643) ─── -->
+        <section class="screen s-name theme-dark" data-screen="name">
+          <div class="race-field">
+            <img class="spa-streak" src="../assets/spa-streak.svg" alt="" aria-hidden="true">
+            <span class="race-bloom"><img src="../assets/race-glow.svg" alt="" aria-hidden="true"></span>
+          </div>
+
+          <button class="circle-btn back-btn on-dark lg lg-sm" data-action="none" aria-label="Back" data-in style="--i:0">
+            <img src="../assets/icon-arrow-left-white.svg" alt="" width="24" height="24">
+          </button>
+
+          <p class="race-q" data-in style="--i:1">Let's start with a name. What are we calling this trip?</p>
+
+          <p class="voice-answer race-answer" id="name-answer" aria-live="polite">Let’s call it Race Week and I want help building it</p>
+
+          <div class="voice-bar lg" data-in style="--i:1">
+            <button class="circle-btn tool-btn tool-left lg lg-sm" data-action="none" aria-label="Gallery">
+              <img src="../assets/icon-gallery.svg" alt="" width="22" height="22">
+            </button>
+            <div class="voice-pill lg" id="name-pill" data-state="idle" role="button" tabindex="0" aria-label="Talk to your companion">
+              <span class="pill-glow"></span>
+              <img class="pill-idle" src="../assets/voice-pill-idle.svg" alt="" width="156" height="64">
+              <span class="pill-active">
+                <img src="../assets/voice-pill-active-dots.svg" alt="" width="120" height="56">
+              </span>
+            </div>
+            <button class="circle-btn tool-btn tool-right lg lg-sm" data-action="none" aria-label="Keyboard">
+              <img src="../assets/icon-keyboard.svg" alt="" width="24" height="24">
+            </button>
+          </div>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ─── Screen · which of these feels like your trip (246:11830) ─── -->
+        <section class="screen s-mood" data-screen="mood">
+          <img class="mood-streak" src="../assets/race-mood-streak.svg" alt="" aria-hidden="true">
+
+          <div class="mood-tile tile-1"><img class="cover" src="../assets/race-mosque.jpg" alt=""></div>
+          <div class="mood-tile tile-2"><img class="cover" src="../assets/race-garage.jpg" alt=""></div>
+          <div class="mood-tile tile-3" data-mood="culture" data-in style="--i:1">
+            <img class="cover" src="../assets/race-mosque.jpg" alt="Sheikh Zayed Grand Mosque at dusk">
+            <button class="mood-pick" data-action="none" aria-label="Pick culture">
+              <img class="ic-add" src="../assets/icon-add-thin.svg" alt=""><img class="ic-check" src="../assets/icon-check.svg" alt="">
+            </button>
+          </div>
+          <div class="mood-tile tile-4" data-mood="race" data-in style="--i:2">
+            <img class="cover" src="../assets/race-garage.jpg" alt="A family in the Formula 1 garage">
+            <button class="mood-pick" data-action="none" aria-label="Pick the race">
+              <img class="ic-add" src="../assets/icon-add-thin.svg" alt=""><img class="ic-check" src="../assets/icon-check.svg" alt="">
+            </button>
+          </div>
+          <div class="mood-tile tile-5" data-mood="desert" data-in style="--i:3">
+            <img class="cover" src="../assets/race-desert.jpg" alt="A dune drive">
+            <button class="mood-pick" data-action="none" aria-label="Pick the desert">
+              <img class="ic-add" src="../assets/icon-add-thin.svg" alt=""><img class="ic-check" src="../assets/icon-check.svg" alt="">
+            </button>
+          </div>
+          <div class="mood-tile tile-6" data-mood="art" data-in style="--i:4">
+            <img class="cover" src="../assets/race-teamlab.jpg" alt="teamLab Phenomena">
+            <button class="mood-pick" data-action="none" aria-label="Pick art">
+              <img class="ic-add" src="../assets/icon-add-thin.svg" alt=""><img class="ic-check" src="../assets/icon-check.svg" alt="">
+            </button>
+          </div>
+
+          <div class="mood-top"></div>
+          <div class="mood-foot"></div>
+
+          <button class="circle-btn back-btn on-dark lg lg-sm" data-action="none" aria-label="Back" data-in style="--i:0">
+            <img src="../assets/icon-arrow-left-white.svg" alt="" width="24" height="24">
+          </button>
+          <p class="race-q" data-in style="--i:0">Which of these feels like your kind of trip?</p>
+
+          <button class="mood-create" id="mood-create" data-action="none" data-in style="--i:5">Create</button>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ─── Screen · building the week (246:11859) ─── -->
+        <section class="screen s-build theme-light" data-screen="build">
+          <div class="build-tabs" data-in style="--i:0">
+            <span class="build-tab on"><span></span></span>
+            <span class="build-tab"><span></span></span>
+            <span class="build-tab"><span></span></span>
+          </div>
+
+          <article class="build-card build-1" data-in style="--i:1">
+            <img class="cover" src="../assets/race-garage.jpg" alt="">
+            <div class="build-frost"></div>
+            <div class="build-rows"><span class="r1"></span><span class="r2"></span><span class="r3"></span></div>
+            <span class="build-orb"></span>
+            <div class="ai-loader build-loader">
+              <span class="loader-disc"></span>
+              <img class="loader-ring" src="../assets/loader-sweep.png" alt="" width="104" height="104">
+              <img class="loader-spark spark-lg" src="../assets/sparkle-fig-lg.svg" alt="" width="38" height="38">
+              <img class="loader-spark spark-sm" src="../assets/sparkle-fig-sm.svg" alt="" width="12" height="12">
+            </div>
+          </article>
+
+          <article class="build-card build-2" data-in style="--i:2">
+            <img class="cover" src="../assets/race-mosque.jpg" alt="">
+            <div class="build-frost"></div>
+            <div class="build-rows"><span class="r1"></span><span class="r2"></span><span class="r3"></span></div>
+            <span class="build-orb"></span>
+            <img class="build-sparks" src="../assets/skel-sparkles.svg" alt="" width="52" height="56">
+          </article>
+          <div class="home-indicator hi-light"></div>
+        </section>
+
+        <!-- ─── Screen · your race week, planned (from the supplied render) ─── -->
+        <section class="screen s-week" data-screen="week">
+          <div class="week-scroll" id="week-scroll">
+            <article class="week-card">
+              <p class="week-brand" data-in style="--i:0"><img src="../assets/icon-ask-sparkle.svg" alt="">Ask Abu Dhabi</p>
+              <h2 class="week-title" data-in style="--i:0">Your race week, planned</h2>
+              <div class="week-chips" data-in style="--i:1">
+                <span class="week-chip">Family of four</span>
+                <span class="week-chip">Four days</span>
+                <span class="week-chip">Culture and the race</span>
+              </div>
+              <div class="week-days">
+                <div class="week-day" data-in style="--i:2"><p class="week-when">Fri 4 Dec</p><p class="week-what">Zayed National Museum in the morning, first practice after lunch</p></div>
+                <div class="week-day" data-in style="--i:3"><p class="week-when">Sat 5 Dec</p><p class="week-what">Yas Waterworld in the morning, the Heritage Village and qualifying after</p></div>
+                <div class="week-day" data-in style="--i:4"><p class="week-when">Sun 6 Dec</p><p class="week-what">Race day. Your sessions stay fixed and the rest fits around them</p></div>
+                <div class="week-day" data-in style="--i:5"><p class="week-when">Mon 7 Dec</p><p class="week-what">Louvre Abu Dhabi before you head home</p></div>
+              </div>
+              <p class="week-note" data-in style="--i:6">Sample plan. Times to confirm.</p>
+              <p class="week-keep" data-in style="--i:6">Keep this plan on the web and in the EAD App. Nothing is saved until you choose.</p>
+              <div class="week-actions" data-in style="--i:7">
+                <button class="ead-cta wide" data-action="none">Save by email</button>
+                <button class="ead-cta wide ghost" data-action="none">Log in</button>
+              </div>
+            </article>
+          </div>
+          <div class="home-indicator hi-dark"></div>
+        </section>
+
+
+      </div>
+      </div>
+    </div>
+
+    <footer class="stage-controls">
+      <button class="ctrl-btn" id="nav-prev" aria-label="Previous screen">←</button>
+      <div class="step-dots" id="step-dots"></div>
+      <button class="ctrl-btn" id="nav-next" aria-label="Next screen">→</button>
+      <button class="ctrl-btn ctrl-restart" id="nav-restart">Restart</button>
+    </footer>
+  </div>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>

@@ -26,6 +26,7 @@
     arrive: ['arrive:stop', 'arrive:order'],
     memories: ['vm:board', 'vm:prompt', 'gen', 'high'],
     spa: ['spa:offer', 'spa:adding'],
+    race: ['race', 'name', 'mood', 'build', 'week'],
   };
 
   const screens = {};
@@ -250,7 +251,7 @@
   function prev() {
     // never step back into an auto-forwarding loader
     let target = stepIndex - 1;
-    const skip = ['loading', 'search:searching', 'adding', 'gen'];
+    const skip = ['loading', 'search:searching', 'adding', 'gen', 'build'];
     if (skip.includes(FLOW[target])) target -= 1;
     goStep(target);
   }
@@ -568,6 +569,64 @@
     if (spaScreen.dataset.state !== 'adding') goStep(FLOW.indexOf('spa:adding'));
   });
 
+  /* ════════════ Race-week flow (Khalid) ════════════ */
+
+  const raceScroll = document.getElementById('race-scroll');
+  const raceBuild = document.getElementById('race-build');
+  const nameScreen = screens.name;
+  const namePill = document.getElementById('name-pill');
+  const nameAnswer = document.getElementById('name-answer');
+  const moodScreen = screens.mood;
+  const moodCreate = document.getElementById('mood-create');
+  const moodTiles = [...moodScreen.querySelectorAll('.mood-tile[data-mood]')];
+  const moodTile = m => moodTiles.find(t => t.dataset.mood === m);
+
+  sliceGradient(nameAnswer);
+
+  /* lights-out at Yas Marina: the countdown on the page is real */
+  const raceCount = document.getElementById('race-count');
+  const LIGHTS_OUT = Date.parse('2026-12-04T17:00:00+04:00');
+  function tickCount() {
+    let left = Math.max(0, Math.floor((LIGHTS_OUT - Date.now()) / 1000));
+    const d = Math.floor(left / 86400); left -= d * 86400;
+    const h = Math.floor(left / 3600); left -= h * 3600;
+    const m = Math.floor(left / 60); const sec = left - m * 60;
+    const pad = n => String(n).padStart(2, '0');
+    raceCount.querySelector('[data-u="d"]').textContent = pad(d);
+    raceCount.querySelector('[data-u="h"]').textContent = pad(h);
+    raceCount.querySelector('[data-u="m"]').textContent = pad(m);
+    raceCount.querySelector('[data-u="s"]').textContent = pad(sec);
+  }
+  tickCount();
+  setInterval(tickCount, 1000);
+
+  /* where the page rests: the Ask card's foot 24px above the phone's edge */
+  const askRest = () => raceScroll.scrollHeight - raceScroll.clientHeight;
+  raceScroll.addEventListener('pointerdown', stopGlide);
+  raceScroll.addEventListener('wheel', stopGlide, { passive: true });
+
+  /* the CTA is the handoff — press it yourself or watch Khalid do it */
+  raceBuild.addEventListener('click', () => {
+    if (FLOW[stepIndex] === 'race') goStep(FLOW.indexOf('name'));
+  });
+
+  /* the mood board: tiles toggle, Create builds */
+  moodTiles.forEach(t => t.querySelector('.mood-pick').addEventListener('click', e => {
+    e.stopPropagation();
+    t.classList.toggle('picked');
+  }));
+  moodCreate.addEventListener('click', () => {
+    if (FLOW[stepIndex] === 'mood') next();
+  });
+  const clearMood = () => moodTiles.forEach(t => t.classList.remove('picked', 'dim'));
+
+  /* tap to skip the moments that auto-forward */
+  nameScreen.addEventListener('click', e => {
+    if (e.target.closest('[data-action]') || e.target.closest('.voice-pill')) return;
+    next();
+  });
+  screens.build.addEventListener('click', next);
+
   /* ─────────────────── Step definitions ─────────────────── */
 
   const STEP = {
@@ -782,6 +841,46 @@
       // the sentence lights once the card has finished travelling
       at(1000, () => lit(spaAdding));
     },
+    /* ── race week ── */
+    race() {
+      stopGlide();
+      raceScroll.scrollTop = 0;                // a restart opens at the hero
+      restartEntrance(screens.race);
+      at(2400, () => glideTo(raceScroll, askRest(), 1600));   // …then wanders down to the card
+      at(4600, () => ghostTap(raceBuild));     // Khalid builds the week
+      at(5000, next);
+    },
+    name() {
+      namePill.dataset.state = 'idle';
+      namePill.classList.remove('pill-done');
+      unlit(nameAnswer);
+      const words = nameAnswer.querySelectorAll('.w');
+      at(900, () => { namePill.dataset.state = 'listening'; });   // mic opens…
+      at(1600, () => {                                             // …Khalid answers
+        words.forEach((w, i) => at(i * 165, () => w.classList.add('on')));
+      });
+      const spoken = 1600 + words.length * 165 + 1100;
+      at(spoken, () => pillDone(namePill));
+      at(spoken + 1000, next);
+    },
+    mood() {
+      clearMood();
+      restartEntrance(moodScreen);
+      // culture and the race — the two he said he was here for
+      at(1900, () => { ghostTap(moodTile('culture').querySelector('.mood-pick')); moodTile('culture').classList.add('picked'); });
+      at(2800, () => { ghostTap(moodTile('race').querySelector('.mood-pick')); moodTile('race').classList.add('picked'); });
+      at(3400, () => { moodTile('desert').classList.add('dim'); moodTile('art').classList.add('dim'); });
+      at(4000, () => ghostTap(moodCreate));
+      at(4400, next);
+    },
+    build() {
+      restartEntrance(screens.build);
+      at(4200, next);
+    },
+    week() {
+      document.getElementById('week-scroll').scrollTop = 0;
+      restartEntrance(screens.week);
+    },
   };
 
   /* geometry to preset before a screen's reveal (runs pre-activation) */
@@ -825,6 +924,11 @@
     gen() { hush(genText); },
     high() {},
     spa() { spaScreen.dataset.state = 'offer'; unlit(spaAdding); },
+    race() { stopGlide(); },
+    name() { namePill.dataset.state = 'idle'; namePill.classList.remove('pill-done'); unlit(nameAnswer); },
+    mood() { clearMood(); },
+    build() {},
+    week() {},
   };
 
   /* dev hook for demos/tests (e.g. jump to a step from the console) */

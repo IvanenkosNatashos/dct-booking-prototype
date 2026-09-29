@@ -1,0 +1,1159 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DCT · Race Week — standalone prototype (EAD Sprint · Khalid)
+   Recreated from Figma: EAD Sprint Workspace 246:11643 / 11830 / 11859
+   and the supplied event-page and plan renders.
+   Shell, motion system and Liquid Glass material shared with the
+   companion prototypes — one app, one flow, its own link.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Abu Dhabi Basis';
+  src: url('../fonts/AbuDhabiBasis-Light.otf') format('opentype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Abu Dhabi Basis';
+  src: url('../fonts/AbuDhabiBasis-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Abu Dhabi Basis';
+  src: url('../fonts/AbuDhabiBasis-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Abu Dhabi Basis';
+  src: url('../fonts/AbuDhabiBasis-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  /* brand */
+  --brand-royal: #4c0c47;
+  --brand-palm: #00605f;
+  --black: #000000;
+  --white: #ffffff;
+  --grey-1: #565a5c;
+  --grey-2: #898c8d;
+  --grey-3: #dddddd;
+  --grey-5: #f0f0f0;
+  --surface-sunken: #f5f5f5;
+  --bg-light: #e9e9e9;
+  /* radii */
+  --r-device: 64px;
+  --r-card: 32px;
+  --r-spot: 16px;
+  --r-btn: 40px;
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 0.68, 0.26, 1);
+  --screen-ms: 680ms;
+  /* how far a card tilts when it is out of the stack — kept as one value so
+     the adding card and the card it lands as can never drift apart */
+  --tilt-held: -1.1deg;
+  --tilt-voice: -0.4deg;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* kill the browser's blue tap-highlight flash on touch/emulated taps */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* no focus ring on pointer taps — keyboard focus keeps a visible ring */
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) { outline: none; }
+button, [role="button"] { user-select: none; -webkit-user-select: none; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Abu Dhabi Basis', -apple-system, 'Segoe UI', sans-serif;
+  background: radial-gradient(120% 90% at 50% 0%, #1d1d22 0%, #101013 60%, #0b0b0d 100%);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+button { font-family: inherit; }
+img { user-select: none; -webkit-user-drag: none; }
+
+/* ─────────────────────── Touch cursor (desktop) ─────────────────────── */
+
+@media (pointer: fine) {
+  body, body * { cursor: none !important; }
+}
+
+.touch-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: scale 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, opacity 0.25s;
+  scale: 1;
+}
+.touch-cursor.visible { opacity: 1; }
+.touch-cursor.down {
+  scale: 1.7;
+  background: rgba(255, 255, 255, 0.4);
+}
+@media (pointer: coarse) {
+  .touch-cursor { display: none; }
+}
+
+/* tap ripple inside the phone */
+.tap-ripple {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  z-index: 90;
+  animation: ripple-out 0.55s cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
+}
+@keyframes ripple-out {
+  from { scale: 0.4; opacity: 0.9; }
+  to { scale: 7; opacity: 0; }
+}
+
+/* ─────────────────── Motion utilities (micro animations) ─────────────────── */
+
+[data-in] { opacity: 0; }
+.screen.active [data-in] {
+  animation: rise-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 115ms + 180ms);
+}
+@keyframes rise-in {
+  from { opacity: 0; translate: 0 26px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* Entrance held. A forwards-filling animation outranks normal declarations,
+   so while `rise-in` is applied no state rule can dim or fade these elements.
+   app.js clears the animation inline (the only way to beat an animation
+   without a specificity war) and adds this class; the low specificity here
+   is deliberate, so every state rule below still wins on opacity. */
+.entrance-held [data-in] { opacity: 1; }
+
+/* slow cinematic drift inside photos (Fantasy-style ken burns) */
+.kenburns {
+  animation: kenburns 22s ease-in-out infinite alternate;
+}
+@keyframes kenburns {
+  from { scale: 1.08; }
+  to { scale: 1.16; }
+}
+/* the results-card photos carry their own Figma crop (width/left offsets),
+   so their drift must compose with it instead of replacing it */
+.card-photo.kenburns { animation-name: kenburns-crop; }
+@keyframes kenburns-crop {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.1); }
+}
+
+/* soft breathing on primary CTAs */
+.breathe { animation: cta-breathe 3.2s ease-in-out infinite; }
+@keyframes cta-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.035; }
+}
+/* elements that both enter and breathe need the two animations composed */
+.screen.active .breathe[data-in] {
+  animation:
+    rise-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    cta-breathe 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 115ms + 180ms), calc(var(--i, 0) * 115ms + 1300ms);
+}
+
+/* spoken words materialise one by one */
+.qw {
+  display: inline-block;
+  opacity: 0;
+  translate: 0 14px;
+  filter: blur(8px);
+  transition:
+    opacity 0.7s ease,
+    translate 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.7s ease;
+}
+.qw.on {
+  opacity: 1;
+  translate: 0 0;
+  filter: blur(0);
+}
+
+/* ═══════════════════ Liquid Glass material (iOS 26) ═══════════════════
+   Three optical ingredients, per Apple's Liquid Glass guidance:
+   1. lensing — the backdrop refracts through an SVG displacement filter
+      (Chromium renders it; other engines gracefully keep the plain frost)
+   2. specular rim — light catches the top edge, a softer glint below
+   3. interactivity — glass brightens and flexes under the finger
+   Applied only to the controls/navigation layer, never to content. */
+
+.lg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.lg {
+  position: relative;
+  isolation: isolate;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: url(#lg-lens) blur(10px) saturate(1.4) brightness(1.04);
+}
+.lg-sm {
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: url(#lg-lens-sm) blur(6px) saturate(1.4) brightness(1.05);
+}
+/* Large content panels. Apple's guidance is to use the material sparingly and
+   to let a surface grow more opaque as it takes focus, so these lean on frost
+   and the specular rim rather than the controls' pronounced lensing. */
+.lg-card {
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: url(#lg-lens-card) blur(18px) saturate(1.5) brightness(1.02);
+}
+
+.lg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow:
+    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.65),
+    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, 0.28),
+    inset 0 0 12px rgba(255, 255, 255, 0.06);
+  transition: box-shadow 0.25s ease;
+}
+
+/* gel-like reaction under the finger */
+button.lg:active::after {
+  box-shadow:
+    inset 1.5px 1.5px 1.5px -1px rgba(255, 255, 255, 0.9),
+    inset -1.5px -1.5px 1.5px -1px rgba(255, 255, 255, 0.5),
+    inset 0 0 22px rgba(255, 255, 255, 0.2);
+}
+
+/* accessibility: honour reduced transparency with opaque surfaces */
+@media (prefers-reduced-transparency: reduce) {
+  .lg, .lg-sm {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .voice-bar.lg { background: rgba(24, 22, 26, 0.92); }
+  .trip-bar.lg { background: rgba(255, 255, 255, 0.92); }
+  .dates-card.lg { background: rgba(255, 255, 255, 0.82); }
+  .banner-card.lg { background: rgba(255, 255, 255, 0.95); }
+}
+
+/* ─────────────────────────── Stage chrome ─────────────────────────── */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  /* the column must not grow to the caption's natural width, or a long tab
+     row pushes the phone off-centre in a narrow window */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
+  align-items: center;
+}
+
+.stage-caption {
+  align-self: end;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-inline: 12px;
+  padding-bottom: 18px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+.caption-brand { color: rgba(255, 255, 255, 0.62); font-weight: 500; }
+.stage-controls {
+  align-self: start;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ctrl-btn {
+  height: 34px;
+  min-width: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.ctrl-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+.step-dots { display: flex; gap: 7px; }
+.step-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background 0.25s, transform 0.25s;
+}
+.step-dots span.on { background: #fff; transform: scale(1.25); }
+
+/* ─────────────────────────── Phone frame ─────────────────────────── */
+
+.phone-wrap {
+  width: calc(390px * var(--phone-scale, 1));
+  height: calc(844px * var(--phone-scale, 1));
+}
+
+.phone {
+  width: 390px;
+  height: 844px;
+  border-radius: var(--r-device);
+  position: relative;
+  transform: scale(var(--phone-scale, 1));
+  transform-origin: top left;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 60px 140px rgba(0, 0, 0, 0.65),
+    0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.phone-screens {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-device);
+  overflow: hidden;
+  background: var(--bg-light);
+}
+
+/* ─────────────────────────── Screens base ─────────────────────────── */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.015);
+  transition: opacity var(--screen-ms) var(--ease-out), transform var(--screen-ms) var(--ease-out);
+  will-change: opacity, transform;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+/* the loading → results dissolve gets extra room to breathe */
+.phone-screens.slow-swap .screen { transition-duration: 1150ms; }
+/* a flat dissolve for swaps where an element must appear not to move:
+   scale snaps to 1 (dropped from the transition) so only opacity fades and
+   the shared card stays pixel-identical through the swap */
+.phone-screens.flat-swap .screen {
+  transform: scale(1);
+  transition: opacity var(--screen-ms) var(--ease-out);
+}
+
+.theme-light { background: var(--bg-light); }
+/* dot grid on light screens (as in the Figma canvas texture) */
+.theme-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.075) 1.3px, rgba(0, 0, 0, 0) 1.4px);
+  background-size: 24px 24px;
+  background-position: 4px 10px;
+  pointer-events: none;
+}
+.theme-dark { background: var(--surface-sunken); }
+
+/* ─────────────────────────── Shared pieces ─────────────────────────── */
+
+.cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.circle-btn {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-btn);
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease-out), background 0.2s;
+}
+.circle-btn:active { transform: scale(0.94); }
+.circle-btn img { display: block; }
+
+.back-btn { left: 16px; top: 38px; }
+.on-dark { background: rgba(255, 255, 255, 0.02); }
+
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 144px;
+  height: 5px;
+  border-radius: 100px;
+  pointer-events: none;
+}
+.hi-dark { background: rgba(0, 0, 0, 0.8); }
+.hi-light { background: rgba(255, 255, 255, 0.8); }
+
+.voice-answer {
+  position: absolute;
+  left: 26px;
+  top: 560px;
+  width: 358px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.15;
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* words are wrapped in .w spans by app.js; each span carries its own
+   gradient slice so opacity/translate animation can't break background-clip */
+.voice-answer .w {
+  display: inline-block;
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 0.7s ease, translate 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.voice-answer .w.on { opacity: 1; translate: 0 0; }
+.voice-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 138px;
+  border-radius: var(--r-device);
+  background: rgba(255, 255, 255, 0.05);
+}
+.tool-btn { top: 32px; background: rgba(255, 255, 255, 0.02); }
+.tool-left { left: 16px; }
+.tool-right { left: 310px; }
+
+.voice-pill {
+  position: absolute;
+  left: 116px;
+  top: 32px;
+  width: 156px;
+  height: 64px;
+  border-radius: var(--r-btn);
+  cursor: pointer;
+  transition: scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.voice-pill:active { scale: 0.95; }
+.pill-idle {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.45s ease, scale 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pill-glow {
+  position: absolute;
+  left: -8px;
+  top: -6px;
+  width: 172px;
+  height: 76px;
+  border-radius: var(--r-btn);
+  background: linear-gradient(159deg, rgba(255, 255, 255, 0.6) 10.4%, rgba(255, 255, 255, 0) 47%, rgba(255, 255, 255, 0.6) 100%);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.pill-active {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-btn);
+  background: var(--grey-5);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  scale: 0.86;
+  transition: opacity 0.45s ease, scale 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  filter: drop-shadow(0 17px 9.35px rgba(41, 38, 47, 0.1));
+}
+.voice-pill[data-state="listening"] .pill-idle { opacity: 0; scale: 0.92; }
+.voice-pill[data-state="listening"] .pill-active { opacity: 1; scale: 1; }
+/* the halo around the pill pulses in time with the dots while talking */
+.voice-pill[data-state="listening"] .pill-glow {
+  opacity: 0.4;
+  animation: glow-pulse 0.9s ease-in-out infinite;
+}
+/* while talking, the dot matrix bounces organically like a voice level */
+.voice-pill[data-state="listening"] .pill-active img {
+  animation: dots-talk 0.9s ease-in-out infinite;
+}
+/* done talking: a quick confirming pop + glow flash, then back to idle */
+.voice-pill.pill-done { animation: pill-pop 0.55s cubic-bezier(0.3, 1.4, 0.5, 1); }
+.voice-pill.pill-done .pill-glow { animation: glow-flash 0.55s ease; }
+
+@keyframes dots-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.07); opacity: 0.82; }
+}
+@keyframes dots-talk {
+  0%, 100% { scale: 1 1; opacity: 1; }
+  25% { scale: 1.05 0.92; opacity: 0.9; }
+  50% { scale: 1.1 1.08; opacity: 1; }
+  75% { scale: 0.96 1.02; opacity: 0.85; }
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.25; scale: 1; }
+  50% { opacity: 0.85; scale: 1.07; }
+}
+@keyframes pill-pop {
+  0% { scale: 1; }
+  40% { scale: 1.07; }
+  100% { scale: 1; }
+}
+@keyframes glow-flash {
+  0% { opacity: 0.4; }
+  35% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+
+/* ── loader beats and skeleton shimmer, shared with the other builds ── */
+
+@keyframes loader-spin { to { rotate: 360deg; } }
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 1; scale: 1; }
+  50% { opacity: 0.6; scale: 0.88; }
+}
+
+@keyframes skel-shimmer {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.11; }
+}
+
+/* ── The AI loader: one component wherever the companion is working ──
+   Rebuilt on primitives that cannot fail to paint. The sweep used to be a
+   conic-gradient clipped by a mask with calc() in it — three features that
+   all have to work together, and where the mask resolving to nothing takes
+   the whole ring with it. It is now a baked PNG: an image either loads or
+   it does not, and this one does. The puck underneath carries the contrast
+   so the white ring reads on a bright photo as well as on a dark field. */
+.ai-loader {
+  position: absolute;
+  width: 104px;
+  height: 104px;
+}
+.loader-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(24, 8, 28, 0.46);
+  box-shadow: 0 0 26px 12px rgba(24, 8, 28, 0.26);
+  /* a plain blur — no SVG filter reference, which Safari drops */
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  backdrop-filter: blur(6px) saturate(1.2);
+}
+.loader-ring {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: loader-spin 1.5s linear infinite;
+}
+.loader-spark {
+  position: absolute;
+  display: block;
+  /* a light glow for dark ground and a dark one for bright ground, so the
+     sparkles never disappear into the backdrop either */
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+          drop-shadow(0 1px 4px rgba(24, 8, 28, 0.55));
+  animation: sparkle-pulse 2.4s ease-in-out infinite;
+}
+.loader-spark.spark-lg { left: 32px; top: 36px; }
+.loader-spark.spark-sm { left: 60px; top: 30px; animation-delay: 0.5s; }
+
+
+
+/* ── the companion field, shared with the spa flow ── */
+
+.spa-streak {
+  position: absolute;
+  left: -2112px;
+  top: -16px;
+  width: 2908px;
+  height: 1139px;
+}
+
+@keyframes spa-glow-drift {
+  from { opacity: 0.75; translate: 0 0; }
+  to { opacity: 1; translate: -18px 22px; }
+}
+
+/* ═══════════ Race-week flow · Khalid, a cold user, plans the Grand Prix (EAD Sprint) ═══════════
+   The Experience Abu Dhabi event page hands off to the companion — a
+   name, a mood board, a build — and hands back a plan in its own light
+   card. Page and plan wear EAD's mint-and-teal; the three beats between
+   them wear the companion's teal field, as the Sprint frames draw them. */
+
+:root {
+  --ead-mint: #eaf6f4;
+  --ead-teal: #00605f;
+  --ead-teal-soft: rgba(0, 96, 95, 0.32);
+  --ead-ink: #1c1c1c;
+  --ead-muted: #6b7273;
+  --ead-line: #e6e6e6;
+}
+
+/* ── Screen · the event page (from the supplied render) ── */
+
+.s-race { background: #ffffff; }
+
+.race-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.race-scroll::-webkit-scrollbar { display: none; }
+
+.race-hero {
+  position: relative;
+  width: 390px;
+  height: 392px;
+  overflow: hidden;
+  background: #0d1a2a;
+}
+.race-hero .cover { object-position: 62% center; }
+.race-hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0.55) 100%);
+}
+.race-topbar {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 40px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--white);
+}
+.race-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.race-back img { display: block; width: 18px; height: 18px; }
+.race-tools { display: flex; gap: 22px; }
+.race-tools img { display: block; width: 24px; height: 24px; }
+
+.race-title {
+  position: absolute;
+  left: 26px;
+  top: 148px;
+  width: 330px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.18;
+  color: var(--white);
+}
+.race-date {
+  position: absolute;
+  left: 26px;
+  top: 262px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--white);
+}
+.race-date img { display: block; width: 18px; height: 20px; filter: brightness(0) invert(1); }
+
+/* a real countdown to lights-out, ticking on the page */
+.race-count {
+  position: absolute;
+  left: 26px;
+  top: 292px;
+  width: 338px;
+  height: 78px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  color: var(--white);
+}
+.race-count .unit { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 48px; }
+.race-count b { font-size: 24px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.race-count small { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.race-count .colon { font-size: 20px; font-weight: 700; opacity: 0.8; margin-top: -14px; }
+
+.race-book {
+  height: 94px;
+  padding: 0 26px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.race-price { display: flex; align-items: baseline; gap: 8px; color: var(--ead-ink); }
+.race-price small { font-size: 12px; font-weight: 500; color: var(--ead-muted); }
+.race-price b { font-size: 24px; font-weight: 700; }
+.race-price .dirham { font-size: 19px; font-weight: 700; margin-right: -4px; }
+
+/* EAD's pill CTA: a solid teal tablet inside a soft teal halo */
+.ead-cta {
+  position: relative;
+  height: 48px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--ead-teal);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(0, 96, 95, 0.28);
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+}
+.ead-cta::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+  rotate: 45deg;
+  margin-top: 1px;
+}
+.ead-cta:active, .ead-cta.pressed { transform: scale(0.97); box-shadow: 0 0 0 6px rgba(0, 96, 95, 0.22); }
+.ead-cta.ghost {
+  background: var(--white);
+  color: var(--ead-teal);
+  box-shadow: 0 0 0 4px rgba(0, 96, 95, 0.16), inset 0 0 0 1.5px rgba(0, 96, 95, 0.4);
+}
+.ead-cta.wide { width: 100%; }
+
+/* the Ask Abu Dhabi card: three taps, prefilled from the ad Khalid came in on */
+.race-ask {
+  margin: 24px 26px 28px;
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--ead-mint);
+}
+.ask-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ead-teal);
+}
+.ask-brand img { display: block; width: 20px; height: 20px; }
+.ask-title {
+  margin-top: 18px;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.22;
+  color: var(--ead-ink);
+}
+.ask-lines {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--ead-ink);
+}
+.ask-line { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; }
+.ask-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(0, 96, 95, 0.55);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ead-teal);
+  font-size: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ask-chip::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  rotate: 45deg;
+  margin-top: -4px;
+}
+.ask-note {
+  margin-top: 18px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ead-muted);
+}
+.race-ask .ead-cta { margin-top: 24px; }
+
+/* ── Screen · a name (Sprint 246:11643) ── */
+
+/* the companion's teal field: EAD's teal falling to black, the same streak
+   as the spa field, and a cyan bloom high on the right */
+.race-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ead-teal) 0%, #000000 100%);
+}
+.race-field .spa-streak { opacity: 1; }
+.race-bloom {
+  position: absolute;
+  left: 145px;
+  top: -211px;
+  width: 599px;
+  height: 599px;
+  pointer-events: none;
+}
+.race-bloom img {
+  position: absolute;
+  inset: -180px;
+  width: 959px;
+  height: 959px;
+  animation: spa-glow-drift 16s ease-in-out infinite alternate;
+}
+
+.race-q {
+  position: absolute;
+  left: 16px;
+  top: 134px;
+  width: 323px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--white);
+}
+.race-answer { left: 16px; top: 563px; width: 327px; }
+
+/* ── Screen · the mood board (Sprint 246:11830) ── */
+
+.s-mood { background: #000; }
+.mood-streak {
+  position: absolute;
+  left: -246.5px;
+  top: 491.5px;
+  width: 1427px;
+  height: 559px;
+  translate: -50% -50%;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* two columns of 191 × 300 tiles, the right one dropped 41px so the rows
+   never line up — the top row peeks in from above the fold */
+.mood-tile {
+  position: absolute;
+  width: 191px;
+  height: 300px;
+  overflow: hidden;
+  background: #16181a;
+}
+.mood-tile .cover { transition: scale 0.9s var(--ease-out), filter 0.6s ease; }
+.mood-tile.picked .cover { scale: 1.06; }
+.mood-tile.dim .cover { filter: brightness(0.55); }
+.tile-1 { left: 0;     top: -115px; }
+.tile-2 { left: 199px; top: -74px;  }
+.tile-3 { left: 0;     top: 193px;  }
+.tile-4 { left: 199px; top: 234px;  }
+.tile-5 { left: 0;     top: 501px;  }
+.tile-6 { left: 199px; top: 542px;  }
+
+/* the pick: a glass plus that turns into a solid white tick */
+.mood-pick {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.1);
+  transition: background 0.35s var(--ease-out), scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mood-pick img { display: block; width: 24px; height: 24px; position: absolute; transition: opacity 0.25s ease, scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.mood-pick .ic-add { opacity: 1; }
+.mood-pick .ic-check { opacity: 0; scale: 0.6; }
+.mood-tile.picked .mood-pick { background: #f0f0f0; filter: drop-shadow(0 17px 9.35px rgba(41, 38, 47, 0.1)); }
+.mood-tile.picked .ic-add { opacity: 0; scale: 0.6; }
+.mood-tile.picked .ic-check { opacity: 1; scale: 1; }
+.mood-pick.pressed { scale: 0.9; }
+
+/* scrims: the top row goes dark so the question reads, the foot dims for the CTA */
+.mood-top {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 391px;
+  height: 279px;
+  background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 100%);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent);
+  pointer-events: none;
+}
+.mood-foot {
+  position: absolute;
+  left: 0;
+  top: 693px;
+  width: 390px;
+  height: 151px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%);
+  mask-image: linear-gradient(to bottom, transparent, #000 45%);
+  pointer-events: none;
+}
+.mood-create {
+  position: absolute;
+  left: 143px;
+  top: 681px;
+  width: 104px;
+  height: 104px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--black);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  filter: drop-shadow(0 17px 9.35px rgba(41, 38, 47, 0.1));
+  transition: scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mood-create.pressed, .mood-create:active { scale: 0.93; }
+
+/* ── Screen · building (Sprint 246:11859) ── */
+
+.s-build { background: var(--bg-light); }
+
+.build-tabs {
+  position: absolute;
+  left: 47px;
+  top: 64px;
+  width: 296px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  gap: 4px;
+}
+.build-tab {
+  flex: 1;
+  border-radius: 100px;
+  display: grid;
+  place-items: center;
+}
+.build-tab.on { background: var(--white); border: 1px solid var(--white); filter: drop-shadow(0 12px 9.5px rgba(41, 38, 47, 0.06)); }
+.build-tab span { display: block; height: 22px; border-radius: 6px; background: var(--grey-5); animation: skel-shimmer 1.6s ease-in-out infinite; opacity: 1; }
+.build-tab.on span { background: var(--grey-3); width: 45px; }
+.build-tab:nth-child(2) span { width: 48px; animation-delay: 0.15s; }
+.build-tab:nth-child(3) span { width: 49px; animation-delay: 0.3s; }
+
+.build-card {
+  position: absolute;
+  left: 16px;
+  width: 358px;
+  height: 486px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--brand-royal);
+  padding: 16px;
+}
+.build-1 { top: 169px; }
+.build-2 { top: 667px; }
+.build-card .cover { filter: blur(30px) saturate(1.05); transform: scale(1.08); }
+.build-frost {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2));
+}
+.build-rows {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 238px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.build-rows span { display: block; border-radius: 12px; background: var(--white); opacity: 0.2; animation: skel-shimmer 1.6s ease-in-out infinite; }
+.build-rows .r1 { width: 49px; height: 22px; }
+.build-rows .r2 { width: 100%; height: 32px; animation-delay: 0.15s; }
+.build-rows .r3 { width: 125px; height: 32px; animation-delay: 0.3s; }
+.build-orb {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  animation: skel-shimmer 1.6s ease-in-out infinite;
+  opacity: 1;
+}
+.build-loader { left: 135px; top: 208px; }
+.build-sparks {
+  position: absolute;
+  left: 153px;
+  top: 215px;
+  width: 52px;
+  height: 56px;
+  animation: sparkle-pulse 2.4s ease-in-out infinite 0.6s;
+}
+
+/* the sentence under the work, same voice as the other builds */
+.build-text { left: 22px; top: 0; width: 345px; text-align: center; }
+
+/* ── Screen · your race week, planned (data-screen="week") (from the supplied render) ── */
+
+.s-week { background: #ffffff; }
+.week-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 16px 20px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.week-scroll::-webkit-scrollbar { display: none; }
+
+.week-card {
+  border-radius: 20px;
+  background: var(--ead-mint);
+  padding: 24px 20px 22px;
+}
+.week-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ead-teal);
+}
+.week-brand img { display: block; width: 20px; height: 20px; }
+.week-title {
+  margin-top: 14px;
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ead-ink);
+}
+.week-chips { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.week-chip {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 100px;
+  background: var(--white);
+  color: var(--ead-teal);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 30px;
+}
+.week-days {
+  margin-top: 16px;
+  border-radius: 12px;
+  background: var(--white);
+  overflow: hidden;
+}
+.week-day { padding: 14px 16px 15px; }
+.week-day + .week-day { border-top: 1px solid var(--ead-line); }
+.week-when { font-size: 13.5px; font-weight: 700; color: var(--ead-teal); }
+.week-what { margin-top: 3px; font-size: 17.5px; font-weight: 400; line-height: 1.3; color: var(--ead-ink); }
+.week-note { margin-top: 18px; font-size: 13.5px; color: var(--ead-muted); }
+.week-keep { margin-top: 12px; font-size: 15px; line-height: 1.4; color: var(--ead-muted); }
+.week-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; padding: 0 4px; }
+
+
+
+/* ─────────────────────── Mobile (real device) ─────────────────────── */
+
+@media (max-width: 560px), (max-height: 700px) {
+  .stage-controls, .caption-brand { display: none; }
+  .stage { grid-template-rows: 1fr; }
+  .stage-caption { position: fixed; top: 10px; left: 50%; translate: -50%; z-index: 60; padding-bottom: 0; }
+  .phone { box-shadow: none; }
+}
+
+/* ─────────────────────── Reduced motion ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .screen { transition-duration: 1ms; }
+  .voice-pill, .voice-pill .pill-active img, .voice-pill .pill-glow,
+  .kenburns, .loader-ring, .loader-spark, .race-bloom img,
+  .build-tab span, .build-rows span, .build-orb, .build-sparks { animation: none; }
+  [data-in] { animation-duration: 1ms; }
+  .voice-answer .w, .mood-tile .cover, .mood-pick, .mood-pick img { transition-duration: 1ms; }
+  .touch-cursor { display: none; }
+}
