@@ -1076,6 +1076,52 @@ button.lg:active::after {
 .build-text { left: 22px; top: 0; width: 345px; text-align: center; }
 
 
+/* ── the day tabs, shared with the rework flow ── */
+.day-tabs {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 138px;
+  width: 296px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.06);
+  display: flex;
+  gap: 4px;
+}
+.tab-glider {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  height: calc(100% - 8px);
+  width: 93.33px;
+  border-radius: 100px;
+  background: var(--white);
+  border: 1px solid var(--white);
+  box-sizing: border-box;
+  filter: drop-shadow(0 12px 9.5px rgba(41, 38, 47, 0.06));
+  translate: 4px 0;
+  transition: translate 0.6s cubic-bezier(0.3, 1.2, 0.4, 1), width 0.4s var(--ease-out);
+}
+.day-tab {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--grey-1);
+  cursor: pointer;
+  transition: color 0.6s ease, scale 0.2s var(--ease-out);
+}
+.day-tab.active { color: var(--black); }
+
 /* ── the day plan's timeline and trip bar, shared with the other flows ── */
 /* ── the timeline ── */
 
@@ -1253,11 +1299,13 @@ button.lg:active::after {
 }
 .orb-on-light { background: rgba(255, 255, 255, 0.6); }
 
-/* ── Screen · your race week, planned — as the day plan (250:12912) ──
-   The plan the companion hands back is the day plan the other flows
-   already use: a day selector, a time rail, and full-bleed photo cards.
-   The EAD copy rides on top; Save by email floats over the list the way
-   "Plan your trip" does in the reference, since Khalid has no account. */
+/* ── Screen · your race week, planned — the schedule frame (250:12912) ──
+   The plan the companion hands back is the Sprint's schedule screen, laid
+   out to its numbers: the day selector centred at 138, the time rail and
+   310 × 138 photo cards from 239, the stop's name set large at the head of
+   each card, and the trip bar under a white blur. The white pill floating
+   over the list is the reference's own; here it is Save by email, because
+   Khalid has no account yet. */
 
 .s-week { background: var(--bg-light); }
 .week-scroll {
@@ -1265,92 +1313,95 @@ button.lg:active::after {
   inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 52px 16px 190px;
+  padding: 239px 16px 190px;
   overscroll-behavior: contain;
   scrollbar-width: none;
 }
 .week-scroll::-webkit-scrollbar { display: none; }
-.week-col { display: flex; flex-direction: column; align-items: flex-start; width: 358px; }
+.week-col { display: flex; flex-direction: column; align-items: flex-start; width: 361px; }
 
-.week-brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ead-teal);
-}
-.week-brand img { display: block; width: 18px; height: 18px; }
-.week-title { margin-top: 10px; font-size: 28px; font-weight: 500; line-height: 1.2; color: var(--black); white-space: nowrap; }
-.week-sub { margin-top: 8px; font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--grey-1); }
+/* the day tabs are the shared component; four days, so four tabs of 72 */
+.wk-tabs { z-index: 5; }
+.wk-glider { width: 72px; }
+.wk-tabs .day-tab { font-size: 16px; }
+.s-week[data-day="1"] .wk-glider { translate: calc(4px + 76px) 0; }
+.s-week[data-day="2"] .wk-glider { translate: calc(4px + 152px) 0; }
+.s-week[data-day="3"] .wk-glider { translate: calc(4px + 228px) 0; }
 
-/* the day selector — the plan's own, four days across */
-.week-days {
-  position: relative;
-  margin-top: 22px;
-  width: 358px;
-  height: 64px;
-  padding: 4px;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 17px 18.7px rgba(41, 38, 47, 0.06);
-  display: flex;
-  gap: 4px;
-}
-.week-glider {
+.wk-avatar {
   position: absolute;
-  left: 4px;
-  top: 4px;
-  width: calc((100% - 8px - 12px) / 4);
-  height: calc(100% - 8px);
-  border-radius: 100px;
-  background: var(--white);
-  border: 1px solid var(--white);
-  box-sizing: border-box;
-  filter: drop-shadow(0 12px 9.5px rgba(41, 38, 47, 0.06));
-  transition: translate 0.55s cubic-bezier(0.3, 1.2, 0.4, 1);
+  left: 278px;
+  top: 42px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 64px rgba(41, 38, 47, 0.26);
+  z-index: 5;
 }
-.week-day {
-  position: relative;
-  z-index: 1;
-  flex: 1 1 0;
-  min-width: 0;
-  border: 0;
-  border-radius: 100px;
-  background: transparent;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--grey-1);
-  cursor: pointer;
-  transition: color 0.4s ease;
-}
-.week-day.active { color: var(--black); }
-.s-week[data-day="1"] .week-glider { translate: calc(100% + 4px) 0; }
-.s-week[data-day="2"] .week-glider { translate: calc(200% + 8px) 0; }
-.s-week[data-day="3"] .week-glider { translate: calc(300% + 12px) 0; }
+.wk-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.week-list[hidden] { display: none; }
+.wk-list { margin-top: 0; width: 361px; gap: 0; }
+.wk-list[hidden] { display: none; }
+.wk-list .tl-row { gap: 10px; }
+.wk-list .tl-rail { height: 150px; }
 /* a day switched to by hand still arrives, row by row */
-.week-list.arrive .tl-row { animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.week-list.arrive .tl-row:nth-child(2) { animation-delay: 90ms; }
-.week-list.arrive .tl-row:nth-child(3) { animation-delay: 180ms; }
+.wk-list.arrive .tl-row { animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.wk-list.arrive .tl-row:nth-child(2) { animation-delay: 90ms; }
+.wk-list.arrive .tl-row:nth-child(3) { animation-delay: 180ms; }
 
-.week-note { margin-top: 12px; font-size: 13px; line-height: 1.4; color: var(--ead-muted); }
+.wk-card {
+  position: relative;
+  flex: 0 0 310px;
+  height: 138px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--brand-royal);
+  padding: 16px;
+}
+.wk-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* the frame darkens the head of the photo, where the name sits */
+.wk-grad {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 16%, rgba(0, 0, 0, 0) 45%);
+}
+.wk-name {
+  position: relative;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--white);
+}
 
-/* the floating pill, parked over the list above the trip bar */
-.week-save {
+/* the floating pill: 191 × 42, white, radius 10, its icon and a bold label */
+.wk-pill {
   position: absolute;
   left: 50%;
-  top: 630px;
-  z-index: 5;
+  top: 588px;
+  z-index: 6;
+  height: 42px;
+  padding: 0 14px 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--black);
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(41, 38, 47, 0.2);
   transform: translateX(-50%);
-  box-shadow: 0 0 0 4px rgba(0, 96, 95, 0.22), 0 14px 28px -8px rgba(41, 38, 47, 0.35);
+  transition: transform 0.18s var(--ease-out);
 }
-.week-save:active, .week-save.pressed { transform: translateX(-50%) scale(0.97); }
+.wk-pill img { display: block; }
+.wk-pill:active, .wk-pill.pressed { transform: translateX(-50%) scale(0.96); }
 
-/* the list dissolves into the bar, as the plan does */
+/* the list dissolves into the bar, as the frame does (173px, white, blur 40) */
 .week-fade {
   position: absolute;
   left: 0;
@@ -1358,10 +1409,10 @@ button.lg:active::after {
   width: 100%;
   height: 173px;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 100%);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 60%);
-  mask-image: linear-gradient(to bottom, transparent, #000 60%);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 55%);
+  mask-image: linear-gradient(to bottom, transparent, #000 55%);
   pointer-events: none;
   z-index: 4;
 }

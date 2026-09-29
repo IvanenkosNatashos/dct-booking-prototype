@@ -633,7 +633,7 @@
   function showDay(i) {
     weekScreen.dataset.day = i;
     weekDays.querySelectorAll('.week-day').forEach(b => b.classList.toggle('active', +b.dataset.day === i));
-    weekScreen.querySelectorAll('.week-list').forEach(l => {
+    weekScreen.querySelectorAll('.wk-list').forEach(l => {
       const on = +l.dataset.day === i;
       l.hidden = !on;
       l.classList.toggle('arrive', on);
@@ -895,7 +895,7 @@
     },
     week() {
       document.getElementById('week-scroll').scrollTop = 0;
-      weekScreen.querySelectorAll('.week-list').forEach(l => l.classList.remove('arrive'));
+      weekScreen.querySelectorAll('.wk-list').forEach(l => l.classList.remove('arrive'));
       showDay(0);                              // a restart opens on Friday
       restartEntrance(weekScreen);
     },
